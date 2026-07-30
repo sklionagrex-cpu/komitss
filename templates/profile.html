@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<div class="header">
+    <h2><i class="fas fa-user"></i> Профиль</h2>
+    <div style="display: flex; gap: 10px;">
+        <a href="#" onclick="document.getElementById('createPostModal').style.display='flex'" style="color: white; font-size: 20px;">
+            <i class="fas fa-plus-circle"></i>
+        </a>
+        <a href="#" onclick="document.getElementById('settingsModal').style.display='flex'" style="color: white; font-size: 20px;">
+            <i class="fas fa-cog"></i>
+        </a>
+    </div>
+</div>
+
+<div class="card" style="text-align: center; padding: 30px;">
+    <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--accent-gradient); 
+                margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; 
+                font-size: 40px; color: white; font-weight: bold; overflow: hidden;">
+        {% if user and user[3] and user[3] != 'default.jpg' %}
+        <img src="/static/avatars/{{ user[3] }}" style="width: 100%; height: 100%; object-fit: cover;">
+        {% else %}
+        {{ username[0].upper() }}
+        {% endif %}
+    </div>
+    <h2>{{ username }}</h2>
+    <p style="color: var(--text-secondary); margin: 8px 0;">{{ user[4] or 'Пользователь Komits' }}</p>
+    <div style="display: flex; justify-content: center; gap: 30px; margin-top: 16px;">
+        <div style="text-align: center;">
+            <div style="font-size: 20px; font-weight: bold; color: var(--accent);">{{ posts_count }}</div>
+            <div style="color: var(--text-secondary); font-size: 12px;">Постов</div>
+        </div>
+        <div style="text-align: center;">
+            <div style="font-size: 20px; font-weight: bold; color: var(--accent);">{{ friends }}</div>
+            <div style="color: var(--text-secondary); font-size: 12px;">Друзей</div>
+        </div>
+        <div style="text-align: center;">
+            <div style="font-size: 20px; font-weight: bold; color: var(--accent);">{{ likes_count }}</div>
+            <div style="color: var(--text-secondary); font-size: 12px;">Лайков</div>
+        </div>
+    </div>
+    {% if user and user[5] %}
+    <p style="color: var(--text-secondary); font-size: 12px; margin-top: 12px;">
+        <i class="fas fa-calendar-alt"></i> Присоединился: {{ user[5][:10] }}
+    </p>
+    {% endif %}
+</div>
+
+<!-- Создать пост - Модальное окно -->
+<div id="createPostModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+     background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: var(--bg-card); border-radius: 16px; padding: 24px; max-width: 500px; width: 100%; 
+                border: 1px solid var(--border-color); max-height: 90vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3><i class="fas fa-pen-fancy"></i> Создать пост</h3>
+            <button onclick="document.getElementById('createPostModal').style.display='none'" 
+                    style="background: none; border: none; color: var(--text-primary); font-size: 24px; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form method="POST" action="/create_post" enctype="multipart/form-data">
+            <textarea name="text" placeholder="Что нового?" rows="4" required 
+                      style="width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border-color); 
+                             border-radius: 12px; color: var(--text-primary); font-size: 16px; resize: vertical;"></textarea>
+            <div style="margin: 12px 0;">
+                <div class="file-upload-wrapper" style="width: 100%;">
+                    <span class="file-upload-btn" style="width: 100%; text-align: center; padding: 12px;">
+                        <i class="fas fa-image"></i> Добавить фото
+                    </span>
+                    <input type="file" name="image" accept="image/*">
+                </div>
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">
+                <i class="fas fa-paper-plane"></i> Опубликовать
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Настройки - Модальное окно -->
+<div id="settingsModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+     background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: var(--bg-card); border-radius: 16px; padding: 24px; max-width: 400px; width: 100%; 
+                border: 1px solid var(--border-color); max-height: 90vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3><i class="fas fa-cog"></i> Настройки</h3>
+            <button onclick="document.getElementById('settingsModal').style.display='none'" 
+                    style="background: none; border: none; color: var(--text-primary); font-size: 24px; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Изменить аватар -->
+        <div style="margin-bottom: 16px;">
+            <h4 style="margin-bottom: 8px;"><i class="fas fa-user-circle"></i> Аватар</h4>
+            <form method="POST" action="/update_avatar" enctype="multipart/form-data">
+                <div class="file-upload-wrapper" style="width: 100%;">
+                    <span class="file-upload-btn" style="width: 100%; text-align: center; padding: 10px;">
+                        <i class="fas fa-upload"></i> Выбрать фото
+                    </span>
+                    <input type="file" name="avatar" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; margin-top: 8px; padding: 10px;">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
+            </form>
+        </div>
+        
+        <!-- Изменить статус -->
+        <div style="margin-bottom: 16px;">
+            <h4 style="margin-bottom: 8px;"><i class="fas fa-pen"></i> Статус</h4>
+            <form method="POST" action="/update_bio">
+                <input type="text" name="bio" placeholder="Ваш статус..." value="{{ user[4] or '' }}"
+                       style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); 
+                              border-radius: 12px; color: var(--text-primary); margin-bottom: 8px;">
+                <button type="submit" class="btn" style="width: 100%; padding: 10px;">
+                    <i class="fas fa-save"></i> Обновить статус
+                </button>
+            </form>
+        </div>
+        
+        <!-- Выйти -->
+        <a href="/logout" class="btn btn-danger" style="width: 100%; text-align: center; text-decoration: none; display: block;">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </a>
+    </div>
+</div>
+
+<script>
+// Закрытие модальных окон по клику вне
+document.getElementById('createPostModal').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+});
+document.getElementById('settingsModal').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+});
+</script>
+{% endblock %}
