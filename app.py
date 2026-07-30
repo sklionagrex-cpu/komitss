@@ -31,7 +31,8 @@ def init_db():
         user_id INTEGER,
         text TEXT,
         image TEXT,
-        created_at TEXT
+        created_at TEXT,
+        community_id INTEGER DEFAULT 0
     )''')
     c.execute('''CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,6 +83,14 @@ def init_db():
         created_at TEXT,
         UNIQUE(user_id, friend_id)
     )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS community_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        community_id INTEGER,
+        user_id INTEGER,
+        text TEXT,
+        image TEXT,
+        created_at TEXT
+    )''')
     conn.commit()
     conn.close()
 
@@ -97,8 +106,12 @@ def index():
     
     db = get_db()
     c = db.cursor()
-    posts = c.execute('''SELECT p.*, u.username FROM posts p 
-                         JOIN users u ON p.user_id = u.id 
+    
+    # Получаем все посты (личные + из сообществ)
+    posts = c.execute('''SELECT p.*, u.username, u.avatar, 
+                         (SELECT name FROM chats WHERE id = p.community_id) as community_name
+                         FROM posts p
+                         JOIN users u ON p.user_id = u.id
                          ORDER BY p.created_at DESC''').fetchall()
     
     comments_dict = {}
@@ -121,6 +134,7 @@ def create_post():
     
     text = request.form.get('text', '')
     image = None
+    community_id = request.form.get('community_id', 0)
     
     if 'image' in request.files:
         file = request.files['image']
@@ -131,8 +145,8 @@ def create_post():
     
     db = get_db()
     c = db.cursor()
-    c.execute('INSERT INTO posts (user_id, text, image, created_at) VALUES (?, ?, ?, ?)',
-              (session['user_id'], text, image, datetime.now().isoformat()))
+    c.execute('INSERT INTO posts (user_id, text, image, created_at, community_id) VALUES (?, ?, ?, ?, ?)',
+              (session['user_id'], text, image, datetime.now().isoformat(), community_id))
     db.commit()
     db.close()
     
@@ -204,9 +218,11 @@ def chats():
     db = get_db()
     c = db.cursor()
     
+    # Получаем все чаты пользователя
     user_chats = c.execute('''SELECT c.*, 
                               (SELECT COUNT(*) FROM messages WHERE chat_id = c.id AND is_read = 0 AND sender_id != ?) as unread,
-                              (SELECT COUNT(*) FROM chat_members WHERE chat_id = c.id) as members_count
+                              (SELECT COUNT(*) FROM chat_members WHERE chat_id = c.id) as members_count,
+                              (SELECT m.text FROM messages m WHERE m.chat_id = c.id ORDER BY m.timestamp DESC LIMIT 1) as last_msg
                               FROM chats c
                               JOIN chat_members cm ON cm.chat_id = c.id
                               WHERE cm.user_id = ? AND c.is_community = 0
@@ -245,34 +261,6 @@ def create_group():
     
     return redirect(url_for('chat_view', chat_id=chat_id))
 
-@app.route('/add_group_members/<int:chat_id>', methods=['POST'])
-def add_group_members(chat_id):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    db = get_db()
-    c = db.cursor()
-    
-    is_admin = c.execute('SELECT * FROM chat_members WHERE chat_id=? AND user_id=? AND role="admin"',
-                        (chat_id, session['user_id'])).fetchone()
-    if not is_admin:
-        flash('Только админ может добавлять участников')
-        return redirect(url_for('chat_view', chat_id=chat_id))
-    
-    members = request.form.getlist('members')
-    for uid in members:
-        if uid:
-            try:
-                c.execute('INSERT INTO chat_members (chat_id, user_id, role, joined_at) VALUES (?, ?, ?, ?)',
-                          (chat_id, uid, 'member', datetime.now().isoformat()))
-            except:
-                pass
-    
-    db.commit()
-    db.close()
-    
-    return redirect(url_for('chat_view', chat_id=chat_id))
-
 @app.route('/chat/<int:chat_id>')
 def chat_view(chat_id):
     if 'user_id' not in session:
@@ -286,7 +274,7 @@ def chat_view(chat_id):
     if not member:
         return redirect(url_for('chats'))
     
-    messages = c.execute('''SELECT m.*, u.username FROM messages m
+    messages = c.execute('''SELECT m.*, u.username, u.avatar FROM messages m
                             JOIN users u ON m.sender_id = u.id
                             WHERE m.chat_id = ?
                             ORDER BY m.timestamp ASC''', (chat_id,)).fetchall()
@@ -335,107 +323,120 @@ def send_message():
     return redirect(url_for('chat_view', chat_id=chat_id))
 
 @app.route('/friends')
-def friends():
+def friends_list():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
     db = get_db()
     c = db.cursor()
     
-    friends = c.execute('''SELECT u.id, u.username, u.avatar, f.status 
+    # Получаем всех друзей (статус accepted)
+    friends = c.execute('''SELECT u.id, u.username, u.avatar, u.bio 
                            FROM friends f
                            JOIN users u ON u.id = f.friend_id
                            WHERE f.user_id = ? AND f.status = 'accepted'
                            UNION
-                           SELECT u.id, u.username, u.avatar, f.status 
+                           SELECT u.id, u.username, u.avatar, u.bio 
                            FROM friends f
                            JOIN users u ON u.id = f.user_id
                            WHERE f.friend_id = ? AND f.status = 'accepted'
                            ''', (session['user_id'], session['user_id'])).fetchall()
     
-    followers = c.execute('''SELECT u.id, u.username, u.avatar, f.status 
-                             FROM friends f
-                             JOIN users u ON u.id = f.user_id
-                             WHERE f.friend_id = ? AND f.status = 'pending'
-                             AND NOT EXISTS (
-                                 SELECT 1 FROM friends f2 
-                                 WHERE f2.user_id = ? AND f2.friend_id = u.id AND f2.status = 'accepted'
-                             )
-                             ''', (session['user_id'], session['user_id'])).fetchall()
-    
-    following = c.execute('''SELECT u.id, u.username, u.avatar, f.status 
-                             FROM friends f
-                             JOIN users u ON u.id = f.friend_id
-                             WHERE f.user_id = ? AND f.status = 'pending'
-                             AND NOT EXISTS (
-                                 SELECT 1 FROM friends f2 
-                                 WHERE f2.user_id = u.id AND f2.friend_id = ? AND f2.status = 'accepted'
-                             )
-                             ''', (session['user_id'], session['user_id'])).fetchall()
-    
-    random_people = c.execute('''SELECT id, username, avatar FROM users 
-                                 WHERE id != ? 
-                                 AND id NOT IN (
-                                     SELECT friend_id FROM friends WHERE user_id = ? AND status = 'accepted'
-                                     UNION
-                                     SELECT user_id FROM friends WHERE friend_id = ? AND status = 'accepted'
-                                     UNION
-                                     SELECT friend_id FROM friends WHERE user_id = ? AND status = 'pending'
-                                     UNION
-                                     SELECT user_id FROM friends WHERE friend_id = ? AND status = 'pending'
-                                 )
-                                 ORDER BY RANDOM() LIMIT 10''', 
-                              (session['user_id'], session['user_id'], session['user_id'], 
-                               session['user_id'], session['user_id'])).fetchall()
-    
     db.close()
-    return render_template('friends.html', friends=friends, followers=followers, following=following,
-                          random_people=random_people, username=session.get('username', ''))
+    return render_template('friends_list.html', friends=friends, username=session.get('username', ''))
 
-@app.route('/friend_action', methods=['POST'])
-def friend_action():
+@app.route('/add_friend', methods=['POST'])
+def add_friend():
     if 'user_id' not in session:
-        return jsonify({'error': 'Not logged in'}), 401
+        return redirect(url_for('login'))
     
-    action = request.form.get('action')
     friend_id = request.form.get('friend_id')
+    action = request.form.get('action', 'add')
     
     db = get_db()
     c = db.cursor()
     
     if action == 'add':
-        existing = c.execute('SELECT * FROM friends WHERE user_id=? AND friend_id=?', 
-                            (session['user_id'], friend_id)).fetchone()
-        if not existing:
-            c.execute('INSERT INTO friends (user_id, friend_id, status, created_at) VALUES (?, ?, ?, ?)',
-                      (session['user_id'], friend_id, 'pending', datetime.now().isoformat()))
+        c.execute('INSERT INTO friends (user_id, friend_id, status, created_at) VALUES (?, ?, ?, ?)',
+                  (session['user_id'], friend_id, 'pending', datetime.now().isoformat()))
     elif action == 'accept':
         c.execute('UPDATE friends SET status = "accepted" WHERE user_id=? AND friend_id=?',
                   (friend_id, session['user_id']))
-    elif action == 'unfollow':
-        c.execute('DELETE FROM friends WHERE user_id=? AND friend_id=?', (session['user_id'], friend_id))
-    elif action == 'remove':
-        c.execute('DELETE FROM friends WHERE (user_id=? AND friend_id=?) OR (user_id=? AND friend_id=?)',
-                  (session['user_id'], friend_id, friend_id, session['user_id']))
+    
+    db.commit()
+    db.close()
+    return redirect(url_for('friends_list'))
+
+@app.route('/profile/<username>')
+def view_profile(username):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    db = get_db()
+    c = db.cursor()
+    
+    user = c.execute('SELECT * FROM users WHERE username=?', (username,)).fetchone()
+    if not user:
+        flash('Пользователь не найден')
+        return redirect(url_for('index'))
+    
+    # Посты пользователя
+    posts = c.execute('SELECT * FROM posts WHERE user_id=? AND community_id=0 ORDER BY created_at DESC', (user[0],)).fetchall()
+    
+    # Проверяем, есть ли чат с этим пользователем
+    chat = c.execute('''SELECT c.id FROM chats c
+                        JOIN chat_members cm1 ON cm1.chat_id = c.id
+                        JOIN chat_members cm2 ON cm2.chat_id = c.id
+                        WHERE cm1.user_id = ? AND cm2.user_id = ? 
+                        AND c.is_group = 0 AND c.is_community = 0
+                        AND (SELECT COUNT(*) FROM chat_members WHERE chat_id = c.id) = 2''',
+                     (session['user_id'], user[0])).fetchone()
+    
+    # Проверка, есть ли запрос в друзья
+    friend_status = c.execute('SELECT status FROM friends WHERE (user_id=? AND friend_id=?) OR (user_id=? AND friend_id=?)',
+                             (session['user_id'], user[0], user[0], session['user_id'])).fetchone()
+    
+    db.close()
+    
+    return render_template('view_profile.html', user=user, posts=posts, chat=chat, 
+                          friend_status=friend_status, username=session.get('username', ''))
+
+@app.route('/create_chat_with_user', methods=['POST'])
+def create_chat_with_user():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    friend_id = request.form.get('friend_id')
+    
+    db = get_db()
+    c = db.cursor()
+    
+    # Проверяем, существует ли уже чат
+    existing = c.execute('''SELECT c.id FROM chats c
+                            JOIN chat_members cm1 ON cm1.chat_id = c.id
+                            JOIN chat_members cm2 ON cm2.chat_id = c.id
+                            WHERE cm1.user_id = ? AND cm2.user_id = ? 
+                            AND c.is_group = 0 AND c.is_community = 0
+                            AND (SELECT COUNT(*) FROM chat_members WHERE chat_id = c.id) = 2''',
+                         (session['user_id'], friend_id)).fetchone()
+    
+    if existing:
+        return redirect(url_for('chat_view', chat_id=existing[0]))
+    
+    # Создаём новый чат
+    c.execute('INSERT INTO chats (name, is_group, is_community, created_at) VALUES (?, ?, ?, ?)',
+              ('', 0, 0, datetime.now().isoformat()))
+    chat_id = c.lastrowid
+    
+    c.execute('INSERT INTO chat_members (chat_id, user_id, joined_at) VALUES (?, ?, ?)',
+              (chat_id, session['user_id'], datetime.now().isoformat()))
+    c.execute('INSERT INTO chat_members (chat_id, user_id, joined_at) VALUES (?, ?, ?)',
+              (chat_id, friend_id, datetime.now().isoformat()))
     
     db.commit()
     db.close()
     
-    return redirect(url_for('friends'))
-
-@app.route('/search_friends')
-def search_friends():
-    if 'user_id' not in session:
-        return jsonify([])
-    
-    query = request.args.get('q', '')
-    db = get_db()
-    c = db.cursor()
-    users = c.execute('''SELECT id, username, avatar FROM users 
-                         WHERE username LIKE ? AND id != ? 
-                         LIMIT 10''', (f'%{query}%', session['user_id'])).fetchall()
-    db.close()
-    return jsonify([{'id': u[0], 'username': u[1], 'avatar': u[2]} for u in users])
+    return redirect(url_for('chat_view', chat_id=chat_id))
 
 @app.route('/communities')
 def communities():
@@ -454,6 +455,61 @@ def communities():
     
     db.close()
     return render_template('communities.html', communities=communities, username=session.get('username', ''))
+
+@app.route('/community/<int:community_id>')
+def view_community(community_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    db = get_db()
+    c = db.cursor()
+    
+    community = c.execute('SELECT * FROM chats WHERE id=? AND is_community=1', (community_id,)).fetchone()
+    if not community:
+        flash('Сообщество не найдено')
+        return redirect(url_for('communities'))
+    
+    # Посты сообщества
+    posts = c.execute('''SELECT p.*, u.username, u.avatar FROM posts p
+                         JOIN users u ON p.user_id = u.id
+                         WHERE p.community_id = ?
+                         ORDER BY p.created_at DESC''', (community_id,)).fetchall()
+    
+    # Проверяем, является ли пользователь админом
+    is_admin = c.execute('SELECT * FROM chat_members WHERE chat_id=? AND user_id=? AND role="admin"',
+                        (community_id, session['user_id'])).fetchone() is not None
+    
+    is_member = c.execute('SELECT * FROM chat_members WHERE chat_id=? AND user_id=?',
+                         (community_id, session['user_id'])).fetchone() is not None
+    
+    db.close()
+    
+    return render_template('view_community.html', community=community, posts=posts, 
+                          is_admin=is_admin, is_member=is_member, username=session.get('username', ''))
+
+@app.route('/create_community_post/<int:community_id>', methods=['POST'])
+def create_community_post(community_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    text = request.form.get('text', '')
+    image = None
+    
+    if 'image' in request.files:
+        file = request.files['image']
+        if file.filename:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join('uploads', filename))
+            image = filename
+    
+    db = get_db()
+    c = db.cursor()
+    c.execute('INSERT INTO posts (user_id, text, image, created_at, community_id) VALUES (?, ?, ?, ?, ?)',
+              (session['user_id'], text, image, datetime.now().isoformat(), community_id))
+    db.commit()
+    db.close()
+    
+    return redirect(url_for('view_community', community_id=community_id))
 
 @app.route('/create_community', methods=['POST'])
 def create_community():
@@ -499,7 +555,7 @@ def join_community(chat_id):
     existing = c.execute('SELECT * FROM chat_members WHERE chat_id=? AND user_id=?', 
                         (chat_id, session['user_id'])).fetchone()
     if existing:
-        return redirect(url_for('chat_view', chat_id=chat_id))
+        return redirect(url_for('view_community', community_id=chat_id))
     
     c.execute('INSERT INTO chat_members (chat_id, user_id, role, joined_at) VALUES (?, ?, ?, ?)',
               (chat_id, session['user_id'], 'member', datetime.now().isoformat()))
@@ -507,7 +563,7 @@ def join_community(chat_id):
     db.close()
     
     flash('Вы вступили в сообщество!')
-    return redirect(url_for('communities'))
+    return redirect(url_for('view_community', community_id=chat_id))
 
 @app.route('/leave_community/<int:chat_id>')
 def leave_community(chat_id):
@@ -601,7 +657,7 @@ def profile():
                                JOIN comments c ON c.id = l.comment_id
                                WHERE c.user_id = ?''', (session['user_id'],)).fetchone()[0]
     
-    posts_count = c.execute('SELECT COUNT(*) FROM posts WHERE user_id = ?', (session['user_id'],)).fetchone()[0]
+    posts_count = c.execute('SELECT COUNT(*) FROM posts WHERE user_id = ? AND community_id=0', (session['user_id'],)).fetchone()[0]
     
     db.close()
     
@@ -642,30 +698,6 @@ def update_bio():
     db.close()
     
     return redirect(url_for('profile'))
-
-@app.route('/profile/<username>')
-def user_profile(username):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    db = get_db()
-    c = db.cursor()
-    
-    user = c.execute('SELECT * FROM users WHERE username=?', (username,)).fetchone()
-    if not user:
-        flash('Пользователь не найден')
-        return redirect(url_for('index'))
-    
-    likes_count = c.execute('''SELECT COUNT(*) FROM likes l
-                               JOIN comments c ON c.id = l.comment_id
-                               WHERE c.user_id = ?''', (user[0],)).fetchone()[0]
-    
-    posts_count = c.execute('SELECT COUNT(*) FROM posts WHERE user_id = ?', (user[0],)).fetchone()[0]
-    
-    db.close()
-    
-    return render_template('user_profile.html', user=user, likes_count=likes_count, posts_count=posts_count,
-                          username=session.get('username', ''))
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Сообщество{% endblock %}
+{% block content %}
+<div class="header">
+    <h2><i class="fas fa-globe"></i> {{ community[1] }}</h2>
+    <a href="/communities"><i class="fas fa-arrow-left"></i></a>
+</div>
+
+<div class="card">
+    <p style="color: var(--text-secondary);">{{ community[4] or 'Описание отсутствует' }}</p>
+    <div style="display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
+        {% if not is_member %}
+        <a href="/join_community/{{ community[0] }}" class="btn">
+            <i class="fas fa-sign-in-alt"></i> Вступить
+        </a>
+        {% else %}
+        <a href="/leave_community/{{ community[0] }}" class="btn btn-danger">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{% if is_admin %}
+<div class="card">
+    <h3 style="margin-bottom: 12px;"><i class="fas fa-plus-circle"></i> Создать пост от имени сообщества</h3>
+    <form method="POST" action="/create_community_post/{{ community[0] }}" enctype="multipart/form-data">
+        <textarea name="text" placeholder="Что нового в сообществе?" rows="3" style="margin-bottom: 10px;"></textarea>
+        <div class="file-upload-wrapper" style="width: 100%; margin-bottom: 10px;">
+            <span class="file-upload-btn" style="width: 100%; text-align: center; padding: 10px;">
+                <i class="fas fa-image"></i> Добавить фото
+            </span>
+            <input type="file" name="image" accept="image/*">
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">
+            <i class="fas fa-paper-plane"></i> Опубликовать
+        </button>
+    </form>
+</div>
+{% endif %}
+
+<div class="card">
+    <h3 style="margin-bottom: 12px;"><i class="fas fa-newspaper"></i> Посты сообщества</h3>
+    {% if posts %}
+        {% for post in posts %}
+        <div style="background: var(--bg-input); padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent-gradient); 
+                            display: flex; align-items: center; justify-content: center; font-size: 12px; 
+                            color: white; overflow: hidden;">
+                    {% if post[6] and post[6] != 'default.jpg' %}
+                    <img src="/static/avatars/{{ post[6] }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    {{ post[5][0].upper() }}
+                    {% endif %}
+                </div>
+                <span style="font-weight: 600; font-size: 14px;">{{ post[5] }}</span>
+                <span style="color: var(--text-secondary); font-size: 11px;">{{ post[4] }}</span>
+            </div>
+            <p>{{ post[2] }}</p>
+            {% if post[3] %}
+            <img src="/uploads/{{ post[3] }}" style="max-width: 100%; border-radius: 8px; margin-top: 8px;">
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: var(--text-secondary); text-align: center; padding: 20px;">
+            <i class="fas fa-newspaper" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
+            В сообществе пока нет постов
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

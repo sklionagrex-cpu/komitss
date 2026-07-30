@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Друзья{% endblock %}
+{% block content %}
+<div class="header">
+    <h2><i class="fas fa-user-friends"></i> Мои друзья</h2>
+    <a href="/profile"><i class="fas fa-arrow-left"></i></a>
+</div>
+
+<div class="card">
+    {% if friends %}
+        {% for friend in friends %}
+        <div style="display: flex; justify-content: space-between; align-items: center; 
+                    padding: 12px; background: var(--bg-input); border-radius: 12px; 
+                    margin-bottom: 8px; border: 1px solid var(--border-color);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--accent-gradient); 
+                            display: flex; align-items: center; justify-content: center; font-size: 18px; 
+                            color: white; overflow: hidden;">
+                    {% if friend[2] and friend[2] != 'default.jpg' %}
+                    <img src="/static/avatars/{{ friend[2] }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    {{ friend[1][0].upper() }}
+                    {% endif %}
+                </div>
+                <div>
+                    <div style="font-weight: 600;">{{ friend[1] }}</div>
+                    <div style="color: var(--text-secondary); font-size: 12px;">{{ friend[3] or 'Пользователь Komits' }}</div>
+                </div>
+            </div>
+            <a href="/profile/{{ friend[1] }}" class="btn" style="padding: 6px 12px; font-size: 12px; text-decoration: none;">
+                <i class="fas fa-user"></i>
+            </a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align: center; color: var(--text-secondary); padding: 20px;">
+            <i class="fas fa-user-friends" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
+            У тебя пока нет друзей
+        </p>
+    {% endif %}
+</div>
+{% endblock %}
