@@ -5,4 +5,4 @@ gunicorn==20.1.0
 flask-sqlalchemy==3.0.5
 flask-login==0.6.2
 werkzeug==2.2.3
-setuptools==65.5.0
+setuptools==69.5.1
