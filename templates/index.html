@@ -1,86 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Лента{% endblock %}
 {% block content %}
 <div class="header">
-    <h2><i class="fas fa-newspaper"></i> Лента</h2>
+    <h2>Komits</h2>
     <div>
         <span>{{ username }}</span>
-        <a href="/logout"><i class="fas fa-sign-out-alt"></i></a>
+        <a href="/logout">🚪</a>
     </div>
 </div>
-
 <div class="card">
-    <h3 style="margin-bottom: 12px;">Создать пост</h3>
-    <form method="POST" action="/create_post" enctype="multipart/form-data">
-        <textarea name="text" placeholder="Что у вас нового?" rows="3" style="margin-bottom: 10px;"></textarea>
-        <div class="file-upload-wrapper">
-            <span class="file-upload-btn"><i class="fas fa-image"></i> Добавить фото</span>
-            <input type="file" name="image" accept="image/*">
-        </div>
-        <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">
-            <i class="fas fa-paper-plane"></i> Опубликовать
-        </button>
-    </form>
+    <h3>Добро пожаловать, {{ username }}!</h3>
+    <p style="color: #999; margin-top: 8px;">Приложение работает. Функционал подключается...</p>
 </div>
-
-{% if posts %}
-    {% for post in posts %}
-    <div class="card">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <a href="/profile/{{ post[7] }}">
-                {% if post[8] and post[8] != 'default.jpg' %}
-                <img src="/static/avatars/{{ post[8] }}" class="avatar">
-                {% else %}
-                <div class="avatar" style="background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                    {{ post[7][0].upper() }}
-                </div>
-                {% endif %}
-            </a>
-            <div>
-                <a href="/profile/{{ post[7] }}" style="color: var(--text-primary); text-decoration: none; font-weight: 600;">{{ post[7] }}</a>
-                <div style="color: var(--text-secondary); font-size: 12px;">{{ post[4] }}</div>
-            </div>
-        </div>
-        <p style="margin-bottom: 10px;">{{ post[2] }}</p>
-        {% if post[3] %}
-        <img src="/uploads/{{ post[3] }}" style="max-width: 100%; border-radius: 8px; margin-bottom: 10px;">
-        {% endif %}
-        
-        <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;">
-            <form method="POST" action="/add_comment/{{ post[0] }}" enctype="multipart/form-data" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <input type="text" name="text" placeholder="Написать комментарий..." style="flex: 1; min-width: 120px;">
-                <div class="file-upload-wrapper" style="width: auto;">
-                    <span class="file-upload-btn" style="padding: 8px 12px; font-size: 14px;"><i class="fas fa-image"></i></span>
-                    <input type="file" name="image" accept="image/*">
-                </div>
-                <button type="submit" class="btn" style="padding: 8px 16px; font-size: 14px;"><i class="fas fa-comment"></i></button>
-            </form>
-            
-            {% if comments_dict and post[0] in comments_dict %}
-                {% for comment in comments_dict[post[0]] %}
-                <div style="background: var(--bg-input); padding: 8px 12px; border-radius: 8px; margin: 4px 0; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color);">
-                    <div>
-                        <strong style="color: var(--accent);">{{ comment[5] }}</strong>: {{ comment[3] }}
-                        {% if comment[4] %}
-                        <br><img src="/uploads/{{ comment[4] }}" style="max-width: 80px; border-radius: 8px; margin-top: 4px;">
-                        {% endif %}
-                    </div>
-                    <a href="/like_comment/{{ comment[0] }}" style="color: #ff6b6b; text-decoration: none; font-size: 16px;">
-                        <i class="fas fa-heart"></i> {{ comment[6] }}
-                    </a>
-                </div>
-                {% endfor %}
-            {% else %}
-            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;"><i class="far fa-comment-dots"></i> Нет комментариев</p>
-            {% endif %}
-        </div>
-    </div>
-    {% endfor %}
-{% else %}
-<div class="card" style="text-align: center; padding: 40px;">
-    <i class="fas fa-newspaper" style="font-size: 48px; color: var(--text-secondary);"></i>
-    <p style="margin-top: 16px; color: var(--text-secondary);">Пока нет постов</p>
-    <p style="font-size: 14px; color: var(--text-secondary);">Будьте первым! 🚀</p>
-</div>
-{% endif %}
 {% endblock %}

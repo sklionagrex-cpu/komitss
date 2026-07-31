@@ -1,50 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Чаты{% endblock %}
 {% block content %}
-<div class="header">
-    <h2><i class="fas fa-comments"></i> Чаты</h2>
-    <a href="/"><i class="fas fa-home"></i></a>
-</div>
-
-<div class="card">
-    <h3 style="margin-bottom: 12px;"><i class="fas fa-plus-circle"></i> Создать группу</h3>
-    <form method="POST" action="/create_group">
-        <input type="text" name="name" placeholder="Название группы" required style="margin-bottom: 8px;">
-        <button type="submit" class="btn" style="width: 100%;"><i class="fas fa-users"></i> Создать</button>
-    </form>
-</div>
-
-{% if chats %}
-    {% for chat in chats %}
-    <a href="/chat/{{ chat[0] }}" style="text-decoration: none; display: block;">
-        <div class="card" style="cursor: pointer;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div style="font-weight: 600;">
-                        <i class="fas fa-{% if chat[2] == 1 %}users{% else %}user{% endif %}"></i>
-                        {% if chat[2] == 1 %}
-                            {{ chat[1] or 'Группа' }}
-                        {% else %}
-                            Чат
-                        {% endif %}
-                    </div>
-                    <div style="color: var(--text-secondary); font-size: 12px;">
-                        <i class="fas fa-users"></i> {{ chat[8] }} участников
-                        {% if chat[7] > 0 %}
-                        <span style="background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 8px;">{{ chat[7] }}</span>
-                        {% endif %}
-                    </div>
-                </div>
-                <div style="color: var(--text-secondary);"><i class="fas fa-chevron-right"></i></div>
-            </div>
-        </div>
-    </a>
-    {% endfor %}
-{% else %}
-<div class="card" style="text-align: center; padding: 40px;">
-    <i class="fas fa-comments" style="font-size: 48px; color: var(--text-secondary);"></i>
-    <p style="margin-top: 16px; color: var(--text-secondary);">У вас пока нет чатов</p>
-    <p style="font-size: 14px; color: var(--text-secondary);">Найдите друзей и начните общение! 💬</p>
-</div>
-{% endif %}
+<div class="header"><h2>Чаты</h2><a href="/">🏠</a></div>
+<div class="card"><p>Чаты будут доступны позже</p></div>
 {% endblock %}

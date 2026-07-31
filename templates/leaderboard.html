@@ -1,35 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Топ комментаторов{% endblock %}
 {% block content %}
-<div class="header">
-    <h2><i class="fas fa-trophy"></i> Топ комментаторов</h2>
-    <a href="/"><i class="fas fa-home"></i></a>
-</div>
-
-<div class="card">
-    {% if leaderboard %}
-        {% for user in leaderboard %}
-        <div style="display: flex; align-items: center; padding: 12px; background: var(--bg-input); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-color);">
-            <span style="font-weight: bold; color: var(--accent); width: 40px; font-size: 18px;">
-                {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% else %}#{{ loop.index }}{% endif %}
-            </span>
-            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 14px; color: white; overflow: hidden; margin-right: 12px;">
-                {% if user[1] and user[1] != 'default.jpg' %}
-                <img src="/static/avatars/{{ user[1] }}" style="width: 100%; height: 100%; object-fit: cover;">
-                {% else %}
-                {{ user[0][0].upper() }}
-                {% endif %}
-            </div>
-            <span style="flex: 1; font-weight: 600;">{{ user[0] }}</span>
-            <span style="background: var(--accent-gradient); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px;"><i class="fas fa-heart"></i> {{ user[2] or 0 }}</span>
-        </div>
-        {% endfor %}
-    {% else %}
-        <div style="text-align: center; padding: 40px;">
-            <i class="fas fa-trophy" style="font-size: 48px; color: var(--text-secondary);"></i>
-            <p style="margin-top: 16px; color: var(--text-secondary);">Пока нет комментаторов</p>
-            <p style="font-size: 14px; color: var(--text-secondary);">Будьте первым! 🚀</p>
-        </div>
-    {% endif %}
-</div>
+<div class="header"><h2>Топ комментаторов</h2><a href="/">🏠</a></div>
+<div class="card"><p>Лидерборд будет доступен позже</p></div>
 {% endblock %}

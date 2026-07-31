@@ -1,54 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Чат{% endblock %}
 {% block content %}
-<div class="header">
-    <div>
-        <a href="/chats" style="margin-right: 10px;"><i class="fas fa-arrow-left"></i></a>
-        <span><i class="fas fa-{% if chat[2] == 1 %}users{% else %}user{% endif %}"></i> 
-        {% if chat[2] == 0 %}
-            {% for member in members %}
-                {% if member[0] != session['user_id'] %}
-                    {{ member[1] }}
-                {% endif %}
-            {% endfor %}
-        {% else %}
-            {{ chat[1] }}
-        {% endif %}
-        </span>
-    </div>
-    <a href="/"><i class="fas fa-home"></i></a>
-</div>
-
-<div class="card" style="max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column;">
-    {% if messages %}
-        {% for msg in messages %}
-        <div style="display: flex; justify-content: {% if msg[2] == session['user_id'] %}flex-end{% else %}flex-start{% endif %};">
-            <div class="message {% if msg[2] == session['user_id'] %}message-sent{% else %}message-received{% endif %}" style="max-width: 80%; padding: 12px 16px; border-radius: 16px; margin: 4px 0; word-wrap: break-word; {% if msg[2] == session['user_id'] %}background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-bottom-right-radius: 4px;{% else %}background: var(--bg-secondary); color: var(--text-primary); border-bottom-left-radius: 4px; border: 1px solid var(--border-color);{% endif %}">
-                {% if msg[2] != session['user_id'] %}
-                <strong style="font-size: 12px; display: block;">{{ msg[6] }}</strong>
-                {% endif %}
-                {{ msg[3] }}
-                {% if msg[4] %}
-                <br><img src="/uploads/{{ msg[4] }}" style="max-width: 200px; border-radius: 8px; margin-top: 4px;">
-                {% endif %}
-                <div style="font-size: 11px; opacity: 0.7; margin-top: 4px;">{{ msg[5] }}</div>
-            </div>
-        </div>
-        {% endfor %}
-    {% else %}
-    <p style="text-align: center; color: var(--text-secondary); padding: 20px;">Нет сообщений. Начните диалог! 💬</p>
-    {% endif %}
-</div>
-
-<div class="card">
-    <form method="POST" action="/send_message" enctype="multipart/form-data" style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <input type="hidden" name="chat_id" value="{{ chat_id }}">
-        <input type="text" name="text" placeholder="Напишите сообщение..." style="flex: 1; min-width: 150px;">
-        <div class="file-upload-wrapper" style="width: auto;">
-            <span class="file-upload-btn" style="padding: 10px 14px;"><i class="fas fa-image"></i></span>
-            <input type="file" name="image" accept="image/*">
-        </div>
-        <button type="submit" class="btn"><i class="fas fa-paper-plane"></i></button>
-    </form>
-</div>
+<div class="header"><h2>Чат</h2><a href="/">🏠</a></div>
+<div class="card"><p>Чат будет доступен позже</p></div>
 {% endblock %}

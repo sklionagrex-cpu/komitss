@@ -1,43 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Komits - {% block title %}{% endblock %}</title>
+    <title>Komits</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a1a2e;
-            --bg-card: #16213e;
-            --bg-input: #1a1a2e;
-            --text-primary: #e0e0e0;
-            --text-secondary: #a0a0a0;
-            --accent: #667eea;
-            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --border-color: #2a2a4a;
-        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial; background: var(--bg-primary); color: var(--text-primary); padding: 16px; padding-bottom: 80px; }
+        body { font-family: Arial; background: #0a0a0a; color: white; padding: 16px; padding-bottom: 80px; }
         .container { max-width: 600px; margin: 0 auto; }
-        .header { background: var(--accent-gradient); color: white; padding: 16px 20px; border-radius: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .header { background: linear-gradient(135deg, #667eea, #764ba2); padding: 16px; border-radius: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
         .header a { color: white; text-decoration: none; margin-left: 15px; }
-        .card { background: var(--bg-card); border-radius: 16px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border-color); }
-        .btn { background: var(--accent-gradient); color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-        .btn:hover { opacity: 0.9; }
-        .btn-danger { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
-        input, textarea { width: 100%; padding: 12px; background: var(--bg-input); border: 2px solid var(--border-color); border-radius: 12px; color: var(--text-primary); font-size: 16px; font-family: inherit; }
-        input:focus, textarea:focus { border-color: var(--accent); outline: none; }
-        .file-upload-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
-        .file-upload-wrapper input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-        .file-upload-btn { background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); padding: 10px 20px; border-radius: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; width: 100%; justify-content: center; }
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-secondary); display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid var(--border-color); }
-        .nav a { text-decoration: none; color: var(--text-secondary); font-size: 24px; padding: 8px 16px; border-radius: 12px; }
-        .nav a.active { color: var(--accent); background: rgba(102,126,234,0.15); }
-        .flash { background: #ff6b6b; color: white; padding: 12px; border-radius: 12px; margin-bottom: 16px; text-align: center; }
-        .flash-success { background: #51cf66; }
-        img { max-width: 100%; border-radius: 8px; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-        .avatar-large { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+        .card { background: #16213e; padding: 16px; border-radius: 16px; margin-bottom: 16px; border: 1px solid #2a2a4a; }
+        .btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; display: inline-block; text-decoration: none; }
+        input, textarea { width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; color: white; }
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1a2e; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #2a2a4a; }
+        .nav a { color: #666; text-decoration: none; font-size: 24px; padding: 8px 16px; border-radius: 12px; }
+        .nav a.active { color: #667eea; background: rgba(102,126,234,0.15); }
+        .flash { background: #ff6b6b; padding: 12px; border-radius: 12px; margin-bottom: 16px; text-align: center; }
     </style>
 </head>
 <body>
@@ -50,12 +28,12 @@
         {% block content %}{% endblock %}
     </div>
     <div class="nav">
-        <a href="/" class="{% if request.path == '/' %}active{% endif %}"><i class="fas fa-home"></i></a>
-        <a href="/chats" class="{% if request.path == '/chats' %}active{% endif %}"><i class="fas fa-comments"></i></a>
-        <a href="/friends" class="{% if request.path == '/friends' %}active{% endif %}"><i class="fas fa-user-friends"></i></a>
-        <a href="/communities" class="{% if request.path == '/communities' %}active{% endif %}"><i class="fas fa-globe"></i></a>
-        <a href="/leaderboard" class="{% if request.path == '/leaderboard' %}active{% endif %}"><i class="fas fa-trophy"></i></a>
-        <a href="/profile" class="{% if request.path == '/profile' %}active{% endif %}"><i class="fas fa-user"></i></a>
+        <a href="/" class="active">🏠</a>
+        <a href="/chats">💬</a>
+        <a href="/friends">👥</a>
+        <a href="/communities">🌍</a>
+        <a href="/leaderboard">🏆</a>
+        <a href="/profile">👤</a>
     </div>
 </body>
 </html>
