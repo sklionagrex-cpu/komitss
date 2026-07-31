@@ -35,7 +35,7 @@
     </div>
     <p style="margin-bottom:10px">{{ post[2] }}</p>
     {% if post[3] %}
-    <img src="/uploads/{{ post[3] }}" class="post-image">
+    <img src="/uploads/{{ post[3] }}" class="post-image" style="max-width:100%;border-radius:12px;margin:10px 0;">
     {% endif %}
     <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:10px">
         <form method="POST" action="/add_comment/{{ post[0] }}" enctype="multipart/form-data" style="display:flex;gap:8px;flex-wrap:wrap">

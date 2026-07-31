@@ -223,13 +223,20 @@ def create_chat():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     friend_id = request.form.get('friend_id')
+    if not friend_id:
+        flash('Выберите пользователя', 'error')
+        return redirect(url_for('friends'))
+    
     db = get_db()
     c = db.cursor()
+    
     existing = c.execute('''SELECT id FROM chats 
                             WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)''',
                          (session['user_id'], friend_id, friend_id, session['user_id'])).fetchone()
     if existing:
+        db.close()
         return redirect(url_for('chat_view', chat_id=existing[0]))
+    
     c.execute('INSERT INTO chats (user1_id, user2_id, created_at) VALUES (?, ?, ?)',
               (session['user_id'], friend_id, datetime.now().isoformat()))
     chat_id = c.lastrowid
