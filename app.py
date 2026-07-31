@@ -148,21 +148,6 @@ def like_comment(comment_id):
     db.close()
     return redirect(request.referrer or url_for('index'))
 
-@app.route('/leaderboard')
-def leaderboard():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    db = get_db()
-    c = db.cursor()
-    data = c.execute('''SELECT u.username, u.avatar, COUNT(l.id) as likes 
-                        FROM users u
-                        JOIN comments c ON c.user_id = u.id
-                        JOIN likes l ON l.comment_id = c.id
-                        GROUP BY u.id
-                        ORDER BY likes DESC LIMIT 10''').fetchall()
-    db.close()
-    return render_template('leaderboard.html', leaderboard=data)
-
 @app.route('/best_commentator')
 def best_commentator():
     if 'user_id' not in session:
