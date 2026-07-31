@@ -1,119 +1,61 @@
 {% extends "base.html" %}
-{% block title %}Друзья{% endblock %}
 {% block content %}
 <div class="header">
-    <h2><i class="fas fa-user-friends"></i> Друзья</h2>
-    <div class="header-actions">
-        <a href="#" onclick="document.getElementById('searchModal').style.display='flex'"><i class="fas fa-search"></i></a>
-    </div>
+    <h2>Друзья</h2>
+    <a href="/">🏠</a>
 </div>
-
-{% if requests %}
 <div class="card">
-    <h3 style="font-size:15px; margin-bottom:10px;"><i class="fas fa-bell"></i> Запросы ({{ requests|length }})</h3>
-    {% for req in requests %}
-    <div class="user-item">
-        <div class="avatar avatar-sm">
-            {% if req[2] and req[2] != 'default.jpg' %}
-            <img src="/static/avatars/{{ req[2] }}" style="width:100%; height:100%; object-fit:cover;">
-            {% else %}
-            {{ req[1][0].upper() }}
-            {% endif %}
-        </div>
-        <div class="info">
-            <div class="name">{{ req[1] }}</div>
-            <div class="bio">Хочет добавить в друзья</div>
-        </div>
-        <form method="POST" action="/add_friend">
-            <input type="hidden" name="friend_id" value="{{ req[0] }}">
-            <input type="hidden" name="action" value="accept">
-            <button type="submit" class="btn btn-success" style="padding:6px 14px; font-size:13px;">Принять</button>
-        </form>
+    <div style="display:flex;gap:8px;">
+        <input type="text" id="searchInput" placeholder="Поиск..." style="flex:1;" oninput="searchUsers(this.value)">
+        <button class="btn" onclick="searchUsers(document.getElementById('searchInput').value)">🔍</button>
     </div>
-    {% endfor %}
+    <div id="searchResults" style="margin-top:8px;"></div>
 </div>
-{% endif %}
-
 <div class="card">
-    <h3 style="font-size:15px; margin-bottom:10px;">Друзья ({{ friends|length }})</h3>
+    <h3>Мои друзья</h3>
     {% if friends %}
         {% for friend in friends %}
-        <div class="user-item">
-            <a href="/profile/{{ friend[1] }}" style="text-decoration:none; display:flex; align-items:center; gap:12px; flex:1; color:var(--text);">
-                <div class="avatar avatar-sm">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#1a1a2e;border-radius:8px;margin:4px 0;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div class="avatar">
                     {% if friend[2] and friend[2] != 'default.jpg' %}
-                    <img src="/static/avatars/{{ friend[2] }}" style="width:100%; height:100%; object-fit:cover;">
+                    <img src="/static/avatars/{{ friend[2] }}" style="width:100%;height:100%;border-radius:50%;">
                     {% else %}
                     {{ friend[1][0].upper() }}
                     {% endif %}
                 </div>
-                <div class="info">
-                    <div class="name">{{ friend[1] }}</div>
-                    <div class="bio">{{ friend[3] or 'Пользователь Komits' }}</div>
-                </div>
-            </a>
-            <a href="/profile/{{ friend[1] }}" class="btn btn-outline" style="padding:6px 14px; font-size:13px;">Профиль</a>
+                <strong>{{ friend[1] }}</strong>
+            </div>
+            <a href="/profile/{{ friend[1] }}" class="btn" style="padding:4px 12px;font-size:12px;">Профиль</a>
         </div>
         {% endfor %}
     {% else %}
-    <div style="text-align:center; padding:30px; color:var(--text-muted);">
-        <i class="fas fa-user-friends" style="font-size:40px; display:block; margin-bottom:12px;"></i>
-        <p>У вас пока нет друзей</p>
-        <p style="font-size:14px;">Найдите людей через поиск 🔍</p>
-    </div>
+    <p style="color:#999;text-align:center;">Нет друзей</p>
     {% endif %}
 </div>
-
-<!-- Modal поиска -->
-<div id="searchModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:999; padding:20px;">
-    <div style="max-width:500px; margin:0 auto; padding-top:40px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <h3 style="font-size:18px;"><i class="fas fa-search"></i> Найти людей</h3>
-            <button onclick="document.getElementById('searchModal').style.display='none'" style="background:none; border:none; color:var(--text); font-size:24px; cursor:pointer;">×</button>
-        </div>
-        <input type="text" id="searchInput" placeholder="Введите имя пользователя..." style="margin-bottom:12px;" onkeyup="searchUsers(this.value)">
-        <div id="searchResults"></div>
-    </div>
-</div>
-
 <script>
 function searchUsers(query) {
     const results = document.getElementById('searchResults');
     if (query.length < 2) { results.innerHTML = ''; return; }
-    
     fetch(`/search_users?q=${encodeURIComponent(query)}`)
         .then(r => r.json())
         .then(users => {
-            if (users.length === 0) {
-                results.innerHTML = '<p style="color:var(--text-muted); padding:20px; text-align:center;">Пользователи не найдены</p>';
-                return;
-            }
+            if (!users.length) { results.innerHTML = '<p style="color:#999;">Ничего не найдено</p>'; return; }
             let html = '';
             users.forEach(u => {
-                html += `
-                    <div class="user-item">
-                        <div class="avatar avatar-sm">
-                            ${u.avatar && u.avatar !== 'default.jpg' 
-                                ? `<img src="/static/avatars/${u.avatar}" style="width:100%; height:100%; object-fit:cover;">`
-                                : u.username[0].toUpperCase()}
-                        </div>
-                        <div class="info">
-                            <div class="name">${u.username}</div>
-                        </div>
-                        <form method="POST" action="/add_friend">
-                            <input type="hidden" name="friend_id" value="${u.id}">
-                            <input type="hidden" name="action" value="add">
-                            <button type="submit" class="btn" style="padding:6px 14px; font-size:13px;">Добавить</button>
-                        </form>
+                html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:#1a1a2e;border-radius:8px;margin:4px 0;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="avatar">${u.avatar && u.avatar !== 'default.jpg' ? `<img src="/static/avatars/${u.avatar}" style="width:100%;height:100%;border-radius:50%;">` : u.username[0].toUpperCase()}</div>
+                        <strong>${u.username}</strong>
                     </div>
-                `;
+                    <form method="POST" action="/add_friend">
+                        <input type="hidden" name="friend_id" value="${u.id}">
+                        <button type="submit" class="btn" style="padding:4px 12px;font-size:12px;">➕</button>
+                    </form>
+                </div>`;
             });
             results.innerHTML = html;
         });
 }
-
-document.getElementById('searchModal').addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
-});
 </script>
 {% endblock %}

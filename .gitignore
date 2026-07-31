@@ -1,7 +1,0 @@
-__pycache__/
-*.pyc
-*.db
-uploads/
-static/avatars/
-*.log
-*.sqlite3

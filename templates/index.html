@@ -1,101 +1,46 @@
 {% extends "base.html" %}
-{% block title %}Лента{% endblock %}
 {% block content %}
 <div class="header">
-    <h2><i class="fas fa-fire" style="-webkit-text-fill-color: initial; color: var(--accent);"></i> Komits</h2>
-    <div class="header-actions">
-        <span style="font-size:14px; opacity:0.7;">{{ username }}</span>
-        <a href="/logout" title="Выйти"><i class="fas fa-sign-out-alt"></i></a>
-    </div>
+    <h2>Лента</h2>
+    <div><span>{{ username }}</span> <a href="/logout">🚪</a></div>
 </div>
-
-<div class="card fade-in">
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-        <div class="avatar avatar-sm">
-            {% if user and user[3] and user[3] != 'default.jpg' %}
-            <img src="/static/avatars/{{ user[3] }}" style="width:100%; height:100%; object-fit:cover;">
-            {% else %}
-            {{ username[0].upper() }}
-            {% endif %}
-        </div>
-        <span style="font-weight:600;">{{ username }}</span>
-    </div>
+<div class="card">
     <form method="POST" action="/create_post" enctype="multipart/form-data">
-        <textarea name="text" placeholder="Что у вас нового? 📝" rows="2"></textarea>
-        <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; align-items:center;">
-            <label style="cursor:pointer; color: var(--text-muted);">
-                <i class="fas fa-image" style="font-size:20px;"></i>
-                <input type="file" name="image" accept="image/*" style="display:none;" onchange="this.parentElement.innerHTML = this.files[0].name">
-            </label>
-            <button type="submit" class="btn" style="flex:1; justify-content:center;">Опубликовать</button>
-        </div>
+        <textarea name="text" placeholder="Что нового?" rows="3"></textarea>
+        <input type="file" name="image" accept="image/*" style="margin:8px 0">
+        <button type="submit" class="btn">Опубликовать</button>
     </form>
 </div>
-
-{% if posts %}
-    {% for post in posts %}
-    <div class="card fade-in" style="animation-delay: {{ loop.index * 0.05 }}s;">
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
-            <a href="/profile/{{ post[7] }}" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
-                <div class="avatar avatar-sm">
-                    {% if post[8] and post[8] != 'default.jpg' %}
-                    <img src="/static/avatars/{{ post[8] }}" style="width:100%; height:100%; object-fit:cover;">
-                    {% else %}
-                    {{ post[7][0].upper() }}
-                    {% endif %}
-                </div>
-                <span style="font-weight:600; color:var(--text);">{{ post[7] }}</span>
-            </a>
-            <span style="color:var(--text-muted); font-size:12px; margin-left:auto;">{{ post[4] }}</span>
-        </div>
-        
-        <p style="margin-bottom:10px;">{{ post[2] }}</p>
-        
-        {% if post[3] %}
-        <img src="/uploads/{{ post[3] }}" class="post-image" alt="Пост">
-        {% endif %}
-        
-        <div style="border-top:1px solid var(--border); padding-top:12px; margin-top:10px;">
-            <form method="POST" action="/add_comment/{{ post[0] }}" enctype="multipart/form-data" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-                <input type="text" name="text" placeholder="Написать комментарий..." style="flex:1; min-width:120px; padding:8px 14px; font-size:14px;">
-                <label style="cursor:pointer; color:var(--text-muted);">
-                    <i class="fas fa-image"></i>
-                    <input type="file" name="image" accept="image/*" style="display:none;">
-                </label>
-                <button type="submit" class="btn" style="padding:8px 16px; font-size:14px;"><i class="fas fa-paper-plane"></i></button>
-            </form>
-            
-            {% if comments_dict and post[0] in comments_dict %}
-                {% for comment in comments_dict[post[0]] %}
-                <div class="comment">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <span class="username">{{ comment[5] }}</span>
-                            <span class="text"> {{ comment[3] }}</span>
-                            {% if comment[4] %}
-                            <br><img src="/uploads/{{ comment[4] }}" style="max-width:80px; border-radius:8px; margin-top:4px;">
-                            {% endif %}
-                        </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span class="time">{{ comment[6] }} ❤️</span>
-                            <a href="/like_comment/{{ comment[0] }}" class="likes">
-                                <i class="fas fa-heart"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
+{% for post in posts %}
+<div class="card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div class="avatar">
+            {% if post[6] and post[6] != 'default.jpg' %}
+            <img src="/static/avatars/{{ post[6] }}" style="width:100%;height:100%;border-radius:50%;">
             {% else %}
-            <div style="color:var(--text-muted); font-size:13px; padding:6px 0;">Нет комментариев</div>
+            {{ post[5][0].upper() }}
             {% endif %}
         </div>
+        <strong>{{ post[5] }}</strong>
+        <span style="color:#999;font-size:12px;margin-left:auto;">{{ post[4] }}</span>
     </div>
-    {% endfor %}
-{% else %}
-<div class="card" style="text-align:center; padding:40px;">
-    <i class="fas fa-newspaper" style="font-size:48px; color:var(--text-muted);"></i>
-    <p style="margin-top:16px; color:var(--text-muted);">Пока нет постов</p>
-    <p style="font-size:14px; color:var(--text-muted);">Будьте первым! 🚀</p>
+    <p>{{ post[2] }}</p>
+    {% if post[3] %}<img src="/uploads/{{ post[3] }}">{% endif %}
+    <div style="border-top:1px solid #2a2a4a;padding-top:10px;margin-top:10px;">
+        <form method="POST" action="/add_comment/{{ post[0] }}" enctype="multipart/form-data" style="display:flex;gap:8px;">
+            <input type="text" name="text" placeholder="Комментарий..." style="flex:1;">
+            <input type="file" name="image" accept="image/*" style="flex:1;">
+            <button type="submit" class="btn">💬</button>
+        </form>
+        {% if comments and post[0] in comments %}
+            {% for comment in comments[post[0]] %}
+            <div style="background:#1a1a2e;padding:8px;border-radius:8px;margin:4px 0;display:flex;justify-content:space-between;">
+                <div><strong>{{ comment[5] }}</strong>: {{ comment[3] }}{% if comment[4] %}<br><img src="/uploads/{{ comment[4] }}" style="max-width:80px;">{% endif %}</div>
+                <a href="/like_comment/{{ comment[0] }}" style="color:#ff6b6b;text-decoration:none;">❤️ {{ comment[6] }}</a>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 </div>
-{% endif %}
+{% endfor %}
 {% endblock %}
