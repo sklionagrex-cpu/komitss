@@ -1,46 +1,380 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="header">
-    <h2>Профиль</h2>
+    <h2><i class="fas fa-user"></i> Профиль</h2>
     <div class="header-actions">
-        <a href="#" onclick="document.getElementById('settingsModal').style.display='flex'"><i class="fas fa-cog"></i></a>
+        <a href="#"><i class="fas fa-cog" onclick="switchTab('settings')"></i></a>
+        <a href="/"><i class="fas fa-home"></i></a>
     </div>
 </div>
-<div class="card" style="text-align:center;padding:24px">
-    <div class="avatar avatar-lg" style="margin:0 auto 12px;display:flex;width:80px;height:80px;font-size:32px">
-        {% if user[3] and user[3] != 'default.jpg' %}
-        <img src="/static/avatars/{{ user[3] }}" style="width:100%;height:100%;border-radius:50%">
-        {% else %}
-        {{ user[1][0].upper() }}
+
+<!-- Вкладки -->
+<div style="display:flex; overflow-x:auto; gap:8px; margin-bottom:16px; background:var(--card); padding:8px; border-radius:var(--radius); border:1px solid var(--border);">
+    <button class="btn btn-outline" onclick="switchTab('main')" style="font-size:12px; padding:6px 12px;" id="tab-main">Основное</button>
+    <button class="btn btn-outline" onclick="switchTab('status')" style="font-size:12px; padding:6px 12px;" id="tab-status">Статус</button>
+    <button class="btn btn-outline" onclick="switchTab('bio')" style="font-size:12px; padding:6px 12px;" id="tab-bio">Биография</button>
+    <button class="btn btn-outline" onclick="switchTab('contacts')" style="font-size:12px; padding:6px 12px;" id="tab-contacts">Контакты</button>
+    <button class="btn btn-outline" onclick="switchTab('social')" style="font-size:12px; padding:6px 12px;" id="tab-social">Соцсети</button>
+    <button class="btn btn-outline" onclick="switchTab('stats')" style="font-size:12px; padding:6px 12px;" id="tab-stats">Статистика</button>
+    <button class="btn btn-outline" onclick="switchTab('achievements')" style="font-size:12px; padding:6px 12px;" id="tab-achievements">Достижения</button>
+    <button class="btn btn-outline" onclick="switchTab('privacy')" style="font-size:12px; padding:6px 12px;" id="tab-privacy">Приватность</button>
+    <button class="btn btn-outline" onclick="switchTab('security')" style="font-size:12px; padding:6px 12px;" id="tab-security">Безопасность</button>
+    <button class="btn btn-outline" onclick="switchTab('devices')" style="font-size:12px; padding:6px 12px;" id="tab-devices">Устройства</button>
+    <button class="btn btn-outline" onclick="switchTab('notifications')" style="font-size:12px; padding:6px 12px;" id="tab-notifications">Уведомления</button>
+    <button class="btn btn-outline" onclick="switchTab('theme')" style="font-size:12px; padding:6px 12px;" id="tab-theme">Тема</button>
+    <button class="btn btn-outline" onclick="switchTab('premium')" style="font-size:12px; padding:6px 12px;" id="tab-premium">Premium</button>
+    <button class="btn btn-outline" onclick="switchTab('storage')" style="font-size:12px; padding:6px 12px;" id="tab-storage">Хранилище</button>
+    <button class="btn btn-outline" onclick="switchTab('archive')" style="font-size:12px; padding:6px 12px;" id="tab-archive">Архив</button>
+    <button class="btn btn-outline" onclick="switchTab('blocked')" style="font-size:12px; padding:6px 12px;" id="tab-blocked">ЧС</button>
+    <button class="btn btn-outline" onclick="switchTab('api')" style="font-size:12px; padding:6px 12px;" id="tab-api">API</button>
+    <button class="btn btn-outline" onclick="switchTab('data')" style="font-size:12px; padding:6px 12px;" id="tab-data">Данные</button>
+</div>
+
+<!-- Все вкладки -->
+<div id="tab-content-main" class="tab-content">
+    <!-- Основная информация -->
+    <div class="card" style="text-align:center; padding:24px;">
+        <div style="position:relative; display:inline-block;">
+            <div class="avatar avatar-lg" style="width:100px; height:100px; font-size:40px; margin:0 auto;">
+                {% if user[3] and user[3] != 'default.jpg' %}
+                <img src="/static/avatars/{{ user[3] }}" style="width:100%;height:100%;object-fit:cover;">
+                {% else %}
+                {{ user[1][0].upper() }}
+                {% endif %}
+            </div>
+            <span style="position:absolute; bottom:0; right:0; background:var(--accent); color:white; border-radius:50%; padding:4px 8px; font-size:12px;">✎</span>
+        </div>
+        <h2>{{ user[1] }}</h2>
+        <p style="color:var(--text-muted);">@{{ user[1] }}</p>
+        <p style="color:var(--text-muted);">ID: {{ user[0] }}</p>
+        <div style="display:flex; justify-content:center; gap:12px; margin-top:8px;">
+            {% if user[9] %}<span style="background:gold; color:black; padding:2px 10px; border-radius:20px;">⭐ Premium</span>{% endif %}
+            {% if user[10] %}<span style="background:#1da1f2; color:white; padding:2px 10px; border-radius:20px;">✅ Verified</span>{% endif %}
+            <span style="background:var(--bg); color:var(--text); padding:2px 10px; border-radius:20px;">Level {{ user[11] }}</span>
+        </div>
+        <div style="margin-top:12px;">
+            <span style="color:var(--text-muted);">Статус: </span>
+            <span style="color:{% if user[5] == 'online' %}green{% elif user[5] == 'dnd' %}red{% elif user[5] == 'away' %}orange{% else %}gray{% endif %};">
+                {% if user[5] == 'online' %}🟢 Онлайн
+                {% elif user[5] == 'dnd' %}🔴 Не беспокоить
+                {% elif user[5] == 'away' %}🟡 Отошел
+                {% else %}⚪ Невидимый{% endif %}
+            </span>
+            {% if user[6] %}<br><span style="color:var(--text-muted);">{{ user[6] }}</span>{% endif %}
+        </div>
+    </div>
+</div>
+
+<div id="tab-content-status" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Статус</h3>
+        <form method="POST" action="/update_status">
+            <select name="status" class="form-control" style="margin-bottom:8px;">
+                <option value="online" {% if user[5]=='online' %}selected{% endif %}>🟢 Онлайн</option>
+                <option value="dnd" {% if user[5]=='dnd' %}selected{% endif %}>🔴 Не беспокоить</option>
+                <option value="away" {% if user[5]=='away' %}selected{% endif %}>🟡 Отошел</option>
+                <option value="invisible" {% if user[5]=='invisible' %}selected{% endif %}>⚪ Невидимый</option>
+            </select>
+            <input type="text" name="custom_status" placeholder="Пользовательский статус" value="{{ user[6] or '' }}" style="margin-bottom:8px;">
+            <select name="expires" style="margin-bottom:8px;">
+                <option value="">Не удалять</option>
+                <option value="30m">Через 30 минут</option>
+                <option value="1h">Через 1 час</option>
+                <option value="today">До конца дня</option>
+                <option value="never">Пока не отключу</option>
+            </select>
+            <button type="submit" class="btn" style="width:100%;">Обновить статус</button>
+        </form>
+    </div>
+</div>
+
+<div id="tab-content-bio" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Биография</h3>
+        <form method="POST" action="/update_profile">
+            <textarea name="bio" rows="4" style="margin-bottom:8px;">{{ user[4] or '' }}</textarea>
+            <button type="submit" class="btn" style="width:100%;">Сохранить</button>
+        </form>
+        <small style="color:var(--text-muted);">Поддерживается Markdown, Emoji, ссылки, хэштеги.</small>
+    </div>
+</div>
+
+<div id="tab-content-contacts" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Контактная информация</h3>
+        <form method="POST" action="/update_profile">
+            <input type="text" name="phone" placeholder="Телефон" value="{{ user[7] or '' }}" style="margin-bottom:8px;">
+            <input type="email" name="email" placeholder="Email" value="{{ user[8] or '' }}" style="margin-bottom:8px;">
+            <input type="date" name="birth_date" value="{{ user[9] or '' }}" style="margin-bottom:8px;">
+            <input type="text" name="country" placeholder="Страна" value="{{ user[10] or '' }}" style="margin-bottom:8px;">
+            <input type="text" name="city" placeholder="Город" value="{{ user[11] or '' }}" style="margin-bottom:8px;">
+            <input type="text" name="timezone" placeholder="Часовой пояс" value="{{ user[12] or 'UTC' }}" style="margin-bottom:8px;">
+            <input type="text" name="language" placeholder="Язык" value="{{ user[13] or 'ru' }}" style="margin-bottom:8px;">
+            <button type="submit" class="btn" style="width:100%;">Сохранить контакты</button>
+        </form>
+    </div>
+</div>
+
+<div id="tab-content-social" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Социальные сети</h3>
+        <form method="POST" action="/add_social_link" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+            <select name="platform" required>
+                <option value="github">GitHub</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="instagram">Instagram</option>
+                <option value="twitter">Twitter</option>
+                <option value="tiktok">TikTok</option>
+                <option value="youtube">YouTube</option>
+                <option value="twitch">Twitch</option>
+                <option value="discord">Discord</option>
+                <option value="steam">Steam</option>
+                <option value="website">Сайт</option>
+            </select>
+            <input type="url" name="url" placeholder="https://..." required style="flex:1;">
+            <button type="submit" class="btn" style="padding:6px 12px;">➕</button>
+        </form>
+        {% if social_links %}
+            {% for link in social_links %}
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1a1e; padding:8px; border-radius:8px; margin-bottom:4px;">
+                <span><i class="fab fa-{{ link[2] }}"></i> {{ link[2]|capitalize }}</span>
+                <a href="{{ link[3] }}" target="_blank" style="color:var(--accent);">{{ link[3] }}</a>
+                <form method="POST" action="/remove_social_link/{{ link[0] }}" style="margin:0;">
+                    <button type="submit" class="btn btn-danger" style="padding:2px 8px; font-size:12px;">✕</button>
+                </form>
+            </div>
+            {% endfor %}
         {% endif %}
     </div>
-    <h2>{{ user[1] }}</h2>
-    <p style="color:var(--text-muted)">{{ user[4] or 'Пользователь' }}</p>
-    <div style="display:flex;justify-content:center;gap:20px;margin:12px 0">
-        <div><span style="color:var(--accent);font-weight:bold;font-size:20px">{{ posts_count }}</span><br><span style="color:var(--text-muted);font-size:12px">Постов</span></div>
-        <div><span style="color:var(--accent);font-weight:bold;font-size:20px">{{ friends_count }}</span><br><span style="color:var(--text-muted);font-size:12px">Друзей</span></div>
-        <div><span style="color:var(--accent);font-weight:bold;font-size:20px">{{ likes_count }}</span><br><span style="color:var(--text-muted);font-size:12px">Лайков</span></div>
-    </div>
 </div>
-<div id="settingsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:999;justify-content:center;align-items:center;padding:20px">
-    <div style="background:var(--card);border-radius:var(--radius);padding:24px;max-width:400px;width:100%;border:1px solid var(--border)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h3 style="font-size:18px"><i class="fas fa-cog"></i> Настройки</h3>
-            <button onclick="document.getElementById('settingsModal').style.display='none'" style="background:none;border:none;color:var(--text);font-size:24px;cursor:pointer">×</button>
+
+<div id="tab-content-stats" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Статистика</h3>
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:8px;">
+            <div style="background:#1a1a1e; padding:12px; border-radius:8px; text-align:center;">
+                <div style="font-size:24px; color:var(--accent);">👥</div>
+                <div>{{ friends_count }}</div>
+                <small style="color:var(--text-muted);">Друзей</small>
+            </div>
+            <div style="background:#1a1a1e; padding:12px; border-radius:8px; text-align:center;">
+                <div style="font-size:24px; color:var(--accent);">📝</div>
+                <div>{{ posts_count }}</div>
+                <small style="color:var(--text-muted);">Постов</small>
+            </div>
+            <div style="background:#1a1a1e; padding:12px; border-radius:8px; text-align:center;">
+                <div style="font-size:24px; color:var(--accent);">❤️</div>
+                <div>{{ likes_count }}</div>
+                <small style="color:var(--text-muted);">Лайков</small>
+            </div>
+            <div style="background:#1a1a1e; padding:12px; border-radius:8px; text-align:center;">
+                <div style="font-size:24px; color:var(--accent);">💬</div>
+                <div>0</div>
+                <small style="color:var(--text-muted);">Сообщений</small>
+            </div>
         </div>
-        <form method="POST" action="/update_avatar" enctype="multipart/form-data" style="margin-bottom:12px">
-            <label style="display:block;margin-bottom:4px;font-weight:500">Аватар</label>
-            <input type="file" name="avatar" accept="image/*" required style="margin-bottom:8px">
-            <button type="submit" class="btn" style="width:100%;justify-content:center">Обновить</button>
-        </form>
-        <form method="POST" action="/update_bio">
-            <label style="display:block;margin-bottom:4px;font-weight:500">Статус</label>
-            <input type="text" name="bio" placeholder="Ваш статус..." value="{{ user[4] or '' }}" style="margin-bottom:8px">
-            <button type="submit" class="btn" style="width:100%;justify-content:center">Обновить</button>
+        <p style="color:var(--text-muted); margin-top:8px;">Регистрация: {{ user[14][:10] if user[14] else 'Неизвестно' }}</p>
+    </div>
+</div>
+
+<div id="tab-content-achievements" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Достижения</h3>
+        {% if achievements %}
+            {% for ach in achievements %}
+            <div style="display:flex; align-items:center; gap:12px; background:#1a1a1e; padding:8px; border-radius:8px; margin-bottom:4px;">
+                <span style="font-size:24px;">{{ ach[2] or '🏆' }}</span>
+                <span>{{ ach[1] }}</span>
+                <small style="color:var(--text-muted); margin-left:auto;">{{ ach[3][:10] }}</small>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--text-muted);">Нет достижений</p>
+        {% endif %}
+        <button class="btn" onclick="alert('Достижения можно заработать')" style="width:100%; margin-top:8px;">Посмотреть все</button>
+    </div>
+</div>
+
+<div id="tab-content-privacy" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Настройки приватности</h3>
+        <form method="POST" action="/update_privacy">
+            <label><input type="checkbox" name="show_phone" value="1" {% if privacy[1] %}checked{% endif %}> Показывать телефон</label><br>
+            <label><input type="checkbox" name="show_email" value="1" {% if privacy[2] %}checked{% endif %}> Показывать Email</label><br>
+            <label><input type="checkbox" name="show_bio" value="1" {% if privacy[3] %}checked{% endif %}> Показывать биографию</label><br>
+            <label><input type="checkbox" name="show_online" value="1" {% if privacy[4] %}checked{% endif %}> Показывать онлайн</label><br>
+            <label><input type="checkbox" name="show_last_seen" value="1" {% if privacy[5] %}checked{% endif %}> Показывать последний визит</label><br>
+            <label><input type="checkbox" name="show_birthday" value="1" {% if privacy[6] %}checked{% endif %}> Показывать день рождения</label><br>
+            <button type="submit" class="btn" style="width:100%; margin-top:8px;">Сохранить</button>
         </form>
     </div>
 </div>
+
+<div id="tab-content-security" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Безопасность</h3>
+        <form method="POST" action="/change_password">
+            <input type="password" name="old_password" placeholder="Старый пароль" required style="margin-bottom:8px;">
+            <input type="password" name="new_password" placeholder="Новый пароль" required style="margin-bottom:8px;">
+            <input type="password" name="confirm_password" placeholder="Подтвердите пароль" required style="margin-bottom:8px;">
+            <button type="submit" class="btn" style="width:100%;">Сменить пароль</button>
+        </form>
+        <hr style="border-color:var(--border); margin:12px 0;">
+        <h4>Двухфакторная авторизация</h4>
+        <button class="btn" onclick="alert('2FA пока в разработке')">Включить 2FA</button>
+        <h4 style="margin-top:12px;">Активные сеансы</h4>
+        <button class="btn btn-danger" onclick="alert('Все сеансы завершены')">Завершить все</button>
+    </div>
+</div>
+
+<div id="tab-content-devices" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Устройства</h3>
+        {% if devices %}
+            {% for device in devices %}
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1a1e; padding:8px; border-radius:8px; margin-bottom:4px;">
+                <div>
+                    <span><i class="fas fa-laptop"></i> {{ device[2] or 'Устройство' }}</span><br>
+                    <small style="color:var(--text-muted);">IP: {{ device[3] }} • Последний вход: {{ device[4][:16] if device[4] else 'Неизвестно' }}</small>
+                </div>
+                <span style="color:{% if device[5] %}green{% else %}gray{% endif %};">{% if device[5] %}🟢 Онлайн{% else %}⚪ Офлайн{% endif %}</span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--text-muted);">Нет активных устройств</p>
+        {% endif %}
+    </div>
+</div>
+
+<div id="tab-content-notifications" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Настройки уведомлений</h3>
+        <form method="POST" action="/update_notifications">
+            <label><input type="checkbox" name="sound" value="1" {% if notif[1] %}checked{% endif %}> Звук</label><br>
+            <label><input type="checkbox" name="vibration" value="1" {% if notif[2] %}checked{% endif %}> Вибрация</label><br>
+            <label><input type="checkbox" name="push" value="1" {% if notif[3] %}checked{% endif %}> Push</label><br>
+            <label><input type="checkbox" name="email" value="1" {% if notif[4] %}checked{% endif %}> Email</label><br>
+            <label><input type="checkbox" name="sms" value="1" {% if notif[5] %}checked{% endif %}> SMS</label><br>
+            <label><input type="checkbox" name="mentions" value="1" {% if notif[6] %}checked{% endif %}> Упоминания</label><br>
+            <label><input type="checkbox" name="reactions" value="1" {% if notif[7] %}checked{% endif %}> Реакции</label><br>
+            <label><input type="checkbox" name="replies" value="1" {% if notif[8] %}checked{% endif %}> Ответы</label><br>
+            <label><input type="checkbox" name="pms" value="1" {% if notif[9] %}checked{% endif %}> Личные сообщения</label><br>
+            <label><input type="checkbox" name="groups" value="1" {% if notif[10] %}checked{% endif %}> Группы</label><br>
+            <label><input type="checkbox" name="channels" value="1" {% if notif[11] %}checked{% endif %}> Каналы</label><br>
+            <button type="submit" class="btn" style="width:100%; margin-top:8px;">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<div id="tab-content-theme" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Персонализация</h3>
+        <form method="POST" action="/update_theme">
+            <select name="theme" style="margin-bottom:8px;">
+                <option value="dark" {% if theme[1]=='dark' %}selected{% endif %}>Тёмная</option>
+                <option value="light" {% if theme[1]=='light' %}selected{% endif %}>Светлая</option>
+                <option value="auto" {% if theme[1]=='auto' %}selected{% endif %}>Авто</option>
+            </select>
+            <input type="color" name="accent_color" value="{{ theme[2] }}" style="width:100%; margin-bottom:8px;">
+            <input type="number" name="font_size" placeholder="Размер шрифта" value="{{ theme[3] }}" style="margin-bottom:8px;">
+            <label><input type="checkbox" name="compact_mode" value="1" {% if theme[4] %}checked{% endif %}> Компактный режим</label><br>
+            <button type="submit" class="btn" style="width:100%; margin-top:8px;">Сохранить тему</button>
+        </form>
+    </div>
+</div>
+
+<div id="tab-content-premium" class="tab-content" style="display:none;">
+    <div class="card" style="text-align:center; padding:30px;">
+        <h2 style="color:gold;">⭐ Premium</h2>
+        <p style="color:var(--text-muted);">Расширенные возможности</p>
+        <ul style="text-align:left; margin:12px 0;">
+            <li>✅ Хранилище 100 ГБ</li>
+            <li>✅ Загрузка файлов до 2 ГБ</li>
+            <li>✅ Эксклюзивные эмодзи</li>
+            <li>✅ Анимированные аватары</li>
+            <li>✅ Приоритетная поддержка</li>
+        </ul>
+        <button class="btn" style="width:100%;">Подписаться</button>
+    </div>
+</div>
+
+<div id="tab-content-storage" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Хранилище</h3>
+        <div style="background:#1a1a1e; padding:12px; border-radius:8px; margin-bottom:8px;">
+            <div>Фото: 12 ГБ</div>
+            <div>Видео: 38 ГБ</div>
+            <div>Документы: 8 ГБ</div>
+            <div>Кэш: 3 ГБ</div>
+        </div>
+        <button class="btn" style="width:100%; margin-bottom:4px;">Очистить кэш</button>
+        <button class="btn btn-outline" style="width:100%;">Управление файлами</button>
+    </div>
+</div>
+
+<div id="tab-content-archive" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Архив</h3>
+        <p style="color:var(--text-muted);">Архивированные чаты, скрытые чаты, черновики</p>
+        <button class="btn" style="width:100%;">Показать архив</button>
+    </div>
+</div>
+
+<div id="tab-content-blocked" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Черный список</h3>
+        {% if blocked %}
+            {% for b in blocked %}
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1a1e; padding:8px; border-radius:8px; margin-bottom:4px;">
+                <span>{{ b[0] }}</span>
+                <form method="POST" action="/unblock_user/{{ b[0] }}" style="margin:0;">
+                    <button type="submit" class="btn" style="padding:2px 8px; font-size:12px;">Разблокировать</button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:var(--text-muted);">Нет заблокированных</p>
+        {% endif %}
+    </div>
+</div>
+
+<div id="tab-content-api" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>API и интеграции</h3>
+        <p style="color:var(--text-muted);">Подключенные приложения, токены API, Webhook</p>
+        <button class="btn" style="width:100%;">Управлять</button>
+    </div>
+</div>
+
+<div id="tab-content-data" class="tab-content" style="display:none;">
+    <div class="card">
+        <h3>Конфиденциальность данных</h3>
+        <button class="btn" style="width:100%; margin-bottom:4px;">Скачать архив данных</button>
+        <button class="btn btn-outline" style="width:100%; margin-bottom:4px;">Экспорт чатов</button>
+        <button class="btn btn-danger" style="width:100%;" onclick="if(confirm('Удалить аккаунт?')){ document.getElementById('delete-form').submit(); }">Удалить аккаунт</button>
+        <form id="delete-form" method="POST" action="/delete_account" style="display:none;"></form>
+    </div>
+</div>
+
 <script>
-document.getElementById('settingsModal').addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
+function switchTab(tab) {
+    // Скрыть все вкладки
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    // Показать выбранную
+    const target = document.getElementById('tab-content-' + tab);
+    if (target) target.style.display = 'block';
+    // Активная кнопка (можно добавить класс active)
+    document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById('tab-' + tab);
+    if (activeBtn) activeBtn.classList.add('active');
+}
+// Показать основную вкладку по умолчанию
+document.addEventListener('DOMContentLoaded', function() {
+    switchTab('main');
+});
 </script>
+<style>
+.tab-content { display: none; }
+.active { background: var(--accent); color: white; }
+</style>
 {% endblock %}
