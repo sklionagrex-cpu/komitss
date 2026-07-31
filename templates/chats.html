@@ -3,100 +3,48 @@
 {% block content %}
 <div class="header">
     <h2><i class="fas fa-comments"></i> Чаты</h2>
-    <div>
-        <a href="#" onclick="document.getElementById('createGroupModal').style.display='flex'" style="color: white; font-size: 20px;">
-            <i class="fas fa-user-plus"></i>
-        </a>
-        <a href="/"><i class="fas fa-home"></i></a>
-    </div>
+    <a href="/"><i class="fas fa-home"></i></a>
 </div>
 
-<!-- Мои чаты -->
 <div class="card">
-    <h3 style="margin-bottom: 12px;"><i class="fas fa-inbox"></i> Мои чаты</h3>
-    {% if chats %}
-        {% for chat in chats %}
-        <a href="/chat/{{ chat[0] }}" style="text-decoration: none; display: block;">
-            <div style="display: flex; justify-content: space-between; align-items: center; 
-                        padding: 12px; background: var(--bg-input); border-radius: 12px; 
-                        margin-bottom: 8px; border: 1px solid var(--border-color);">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--accent-gradient); 
-                                display: flex; align-items: center; justify-content: center; font-size: 18px; 
-                                color: white; overflow: hidden;">
-                        {% if chat[6] %}
-                        <img src="/uploads/group_avatars/{{ chat[6] }}" style="width: 100%; height: 100%; object-fit: cover;">
-                        {% else %}
+    <h3 style="margin-bottom: 12px;"><i class="fas fa-plus-circle"></i> Создать группу</h3>
+    <form method="POST" action="/create_group">
+        <input type="text" name="name" placeholder="Название группы" required style="margin-bottom: 8px;">
+        <button type="submit" class="btn" style="width: 100%;"><i class="fas fa-users"></i> Создать</button>
+    </form>
+</div>
+
+{% if chats %}
+    {% for chat in chats %}
+    <a href="/chat/{{ chat[0] }}" style="text-decoration: none; display: block;">
+        <div class="card" style="cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: 600;">
                         <i class="fas fa-{% if chat[2] == 1 %}users{% else %}user{% endif %}"></i>
+                        {% if chat[2] == 1 %}
+                            {{ chat[1] or 'Группа' }}
+                        {% else %}
+                            Чат
                         {% endif %}
                     </div>
-                    <div>
-                        <div style="font-weight: 600;">
-                            {% if chat[2] == 1 %}
-                                {{ chat[1] or 'Группа' }}
-                            {% else %}
-                                Чат
-                            {% endif %}
-                        </div>
-                        <div style="color: var(--text-secondary); font-size: 12px;">
-                            <i class="fas fa-users"></i> {{ chat[8] }} участников
-                        </div>
+                    <div style="color: var(--text-secondary); font-size: 12px;">
+                        <i class="fas fa-users"></i> {{ chat[8] }} участников
+                        {% if chat[7] > 0 %}
+                        <span style="background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 8px;">{{ chat[7] }}</span>
+                        {% endif %}
                     </div>
                 </div>
-                <div>
-                    {% if chat[7] > 0 %}
-                    <span style="background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">
-                        {{ chat[7] }}
-                    </span>
-                    {% endif %}
-                    <span style="color: var(--text-secondary); margin-left: 8px;">
-                        <i class="fas fa-chevron-right"></i>
-                    </span>
-                </div>
+                <div style="color: var(--text-secondary);"><i class="fas fa-chevron-right"></i></div>
             </div>
-        </a>
-        {% endfor %}
-    {% else %}
-        <p style="color: var(--text-secondary); text-align: center; padding: 20px;">
-            <i class="fas fa-inbox" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
-            У тебя пока нет чатов
-        </p>
-    {% endif %}
-</div>
-
-<!-- Создать группу - Модальное окно -->
-<div id="createGroupModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-     background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 20px;">
-    <div style="background: var(--bg-card); border-radius: 16px; padding: 24px; max-width: 450px; width: 100%; 
-                border: 1px solid var(--border-color); max-height: 90vh; overflow-y: auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3><i class="fas fa-users"></i> Создать группу</h3>
-            <button onclick="document.getElementById('createGroupModal').style.display='none'" 
-                    style="background: none; border: none; color: var(--text-primary); font-size: 24px; cursor: pointer;">
-                <i class="fas fa-times"></i>
-            </button>
         </div>
-        <form method="POST" action="/create_group" enctype="multipart/form-data">
-            <input type="text" name="name" placeholder="Название группы" required 
-                   style="margin-bottom: 12px;">
-            <div style="margin-bottom: 12px;">
-                <div class="file-upload-wrapper" style="width: 100%;">
-                    <span class="file-upload-btn" style="width: 100%; text-align: center; padding: 10px;">
-                        <i class="fas fa-image"></i> Аватар группы
-                    </span>
-                    <input type="file" name="avatar" accept="image/*">
-                </div>
-            </div>
-            <button type="submit" class="btn" style="width: 100%;">
-                <i class="fas fa-check"></i> Создать группу
-            </button>
-        </form>
-    </div>
+    </a>
+    {% endfor %}
+{% else %}
+<div class="card" style="text-align: center; padding: 40px;">
+    <i class="fas fa-comments" style="font-size: 48px; color: var(--text-secondary);"></i>
+    <p style="margin-top: 16px; color: var(--text-secondary);">У вас пока нет чатов</p>
+    <p style="font-size: 14px; color: var(--text-secondary);">Найдите друзей и начните общение! 💬</p>
 </div>
-
-<script>
-document.getElementById('createGroupModal').addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
-});
-</script>
+{% endif %}
 {% endblock %}

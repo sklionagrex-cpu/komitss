@@ -7,54 +7,39 @@
 </div>
 
 <div class="card" style="text-align: center; padding: 30px;">
-    <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--accent-gradient); 
-                margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; 
-                font-size: 40px; color: white; font-weight: bold; overflow: hidden;">
-        {% if user[3] and user[3] != 'default.jpg' %}
-        <img src="/static/avatars/{{ user[3] }}" style="width: 100%; height: 100%; object-fit: cover;">
-        {% else %}
-        {{ user[1][0].upper() }}
-        {% endif %}
-    </div>
+    {% if user[3] and user[3] != 'default.jpg' %}
+    <img src="/static/avatars/{{ user[3] }}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 16px; display: block;">
+    {% else %}
+    <div style="width: 100px; height: 100px; border-radius: 50%; background: var(--accent-gradient); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white;">{{ user[1][0].upper() }}</div>
+    {% endif %}
     <h2>{{ user[1] }}</h2>
     <p style="color: var(--text-secondary); margin: 8px 0;">{{ user[4] or 'Пользователь Komits' }}</p>
     {% if user[5] %}
-    <p style="color: var(--text-secondary); font-size: 12px;">
-        <i class="fas fa-calendar-alt"></i> Присоединился: {{ user[5][:10] }}
-    </p>
+    <p style="color: var(--text-secondary); font-size: 12px;">Присоединился: {{ user[5][:10] }}</p>
     {% endif %}
 
     <div style="display: flex; gap: 10px; margin-top: 16px; justify-content: center; flex-wrap: wrap;">
         {% if chat %}
-        <a href="/chat/{{ chat[0] }}" class="btn">
-            <i class="fas fa-comment"></i> Написать
-        </a>
+        <a href="/chat/{{ chat[0] }}" class="btn"><i class="fas fa-comment"></i> Написать</a>
         {% else %}
         <form method="POST" action="/create_chat_with_user">
             <input type="hidden" name="friend_id" value="{{ user[0] }}">
-            <button type="submit" class="btn">
-                <i class="fas fa-comment"></i> Написать
-            </button>
+            <button type="submit" class="btn"><i class="fas fa-comment"></i> Написать</button>
         </form>
         {% endif %}
-
         {% if friend_status and friend_status[0] == 'pending' %}
             {% if friend_status[1] == session['user_id'] %}
             <form method="POST" action="/add_friend">
-                <input type="hidden" name="action" value="accept">
                 <input type="hidden" name="friend_id" value="{{ user[0] }}">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-check"></i> Принять
-                </button>
+                <input type="hidden" name="action" value="accept">
+                <button type="submit" class="btn" style="background: #51cf66;"><i class="fas fa-check"></i> Принять</button>
             </form>
             {% endif %}
         {% else %}
         <form method="POST" action="/add_friend">
-            <input type="hidden" name="action" value="add">
             <input type="hidden" name="friend_id" value="{{ user[0] }}">
-            <button type="submit" class="btn">
-                <i class="fas fa-user-plus"></i> Добавить в друзья
-            </button>
+            <input type="hidden" name="action" value="add">
+            <button type="submit" class="btn"><i class="fas fa-user-plus"></i> Добавить</button>
         </form>
         {% endif %}
     </div>
@@ -73,10 +58,7 @@
         </div>
         {% endfor %}
     {% else %}
-        <p style="color: var(--text-secondary); text-align: center; padding: 20px;">
-            <i class="fas fa-newspaper" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
-            У пользователя нет постов
-        </p>
+    <p style="color: var(--text-secondary); text-align: center; padding: 20px;">У пользователя нет постов</p>
     {% endif %}
 </div>
 {% endblock %}

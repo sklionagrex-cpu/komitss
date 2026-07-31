@@ -6,52 +6,30 @@
     <a href="/"><i class="fas fa-home"></i></a>
 </div>
 
-<!-- Создать сообщество -->
 <div class="card">
-    <details>
-        <summary style="cursor: pointer; color: var(--accent); font-weight: 600; font-size: 16px;">
-            <i class="fas fa-plus-circle"></i> Создать сообщество
-        </summary>
-        <form method="POST" action="/create_community" style="margin-top: 12px;">
-            <input type="text" name="name" placeholder="Название сообщества" required style="margin-bottom: 10px;">
-            <input type="text" name="description" placeholder="Описание (необязательно)" style="margin-bottom: 10px;">
-            <button type="submit" class="btn" style="width: 100%;">
-                <i class="fas fa-globe"></i> Создать
-            </button>
-        </form>
-    </details>
+    <h3 style="margin-bottom: 12px;"><i class="fas fa-plus-circle"></i> Создать сообщество</h3>
+    <form method="POST" action="/create_community">
+        <input type="text" name="name" placeholder="Название" required style="margin-bottom: 8px;">
+        <input type="text" name="description" placeholder="Описание" style="margin-bottom: 8px;">
+        <button type="submit" class="btn" style="width: 100%;"><i class="fas fa-globe"></i> Создать</button>
+    </form>
 </div>
 
-<!-- Список сообществ -->
 {% if communities %}
     {% for community in communities %}
-    <div class="card fade-in">
+    <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: start;">
-            <div style="flex: 1;">
-                <div style="font-weight: 600; font-size: 18px; color: var(--accent);">
-                    <i class="fas fa-globe"></i> {{ community[1] }}
-                </div>
-                {% if community[4] %}
-                <div style="color: var(--text-secondary); font-size: 14px; margin: 4px 0;">
-                    {{ community[4] }}
-                </div>
-                {% endif %}
-                <div style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
-                    <i class="fas fa-users"></i> {{ community[8] }} участников
-                </div>
+            <div>
+                <h3 style="color: var(--accent);">{{ community[1] }}</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; margin: 4px 0;">{{ community[4] or 'Описание отсутствует' }}</p>
+                <div style="color: var(--text-secondary); font-size: 13px;"><i class="fas fa-users"></i> {{ community[8] }} участников</div>
             </div>
             <div>
                 {% if community[9] > 0 %}
-                    <a href="/chat/{{ community[0] }}" class="btn" style="padding: 6px 12px; font-size: 12px; text-decoration: none;">
-                        <i class="fas fa-comment"></i> Открыть
-                    </a>
-                    <a href="/leave_community/{{ community[0] }}" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px; text-decoration: none; margin-top: 4px; display: inline-block;">
-                        <i class="fas fa-sign-out-alt"></i> Выйти
-                    </a>
+                    <a href="/community/{{ community[0] }}" class="btn" style="padding: 6px 12px; font-size: 12px; text-decoration: none;"><i class="fas fa-eye"></i></a>
+                    <a href="/leave_community/{{ community[0] }}" class="btn btn-danger" style="padding: 6px 12px; font-size: 12px; text-decoration: none; margin-top: 4px; display: inline-block;"><i class="fas fa-sign-out-alt"></i></a>
                 {% else %}
-                    <a href="/join_community/{{ community[0] }}" class="btn" style="padding: 6px 12px; font-size: 12px; text-decoration: none;">
-                        <i class="fas fa-sign-in-alt"></i> Вступить
-                    </a>
+                    <a href="/join_community/{{ community[0] }}" class="btn" style="padding: 6px 12px; font-size: 12px; text-decoration: none;"><i class="fas fa-sign-in-alt"></i> Вступить</a>
                 {% endif %}
             </div>
         </div>
@@ -61,7 +39,7 @@
 <div class="card" style="text-align: center; padding: 40px;">
     <i class="fas fa-globe" style="font-size: 48px; color: var(--text-secondary);"></i>
     <p style="margin-top: 16px; color: var(--text-secondary);">Нет сообществ</p>
-    <p style="font-size: 14px; color: var(--text-secondary);">Создай своё первое сообщество! 🚀</p>
+    <p style="font-size: 14px; color: var(--text-secondary);">Создайте первое! 🚀</p>
 </div>
 {% endif %}
 {% endblock %}

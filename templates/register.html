@@ -21,8 +21,8 @@ a{color:#667eea;text-decoration:none}
 <h1>Komits<span>.</span></h1>
 {% with messages = get_flashed_messages() %}{% if messages %}<div class="flash">{{ messages[0] }}</div>{% endif %}{% endwith %}
 <form method="POST">
-<input type="text" name="username" placeholder="👤 Придумай юзернейм" required>
-<input type="password" name="password" placeholder="🔒 Придумай пароль" required>
+<input type="text" name="username" placeholder="👤 Придумайте юзернейм" required>
+<input type="password" name="password" placeholder="🔒 Придумайте пароль" required>
 <button type="submit"><i class="fas fa-user-plus"></i> Зарегистрироваться</button>
 </form>
 <div class="link">Уже есть аккаунт? <a href="/login">Войти</a></div>
