@@ -1,32 +1,86 @@
 {% extends "base.html" %}
 {% block title %}Профиль{% endblock %}
 {% block content %}
-<div class="header"><h2>Профиль</h2><a href="/">🏠</a></div>
-<div class="card" style="text-align:center;padding:30px;">
-    <div style="width:80px;height:80px;border-radius:50%;background:var(--accent-gradient);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;color:white;overflow:hidden;">
-        {% if user[3] and user[3] != 'default.jpg' %}
-        <img src="/static/avatars/{{ user[3] }}" style="width:100%;height:100%;object-fit:cover;">
-        {% else %}
-        {{ user[1][0].upper() }}
+<div class="header">
+    <h2>Профиль</h2>
+    <div class="header-actions">
+        <a href="#" onclick="document.getElementById('settingsModal').style.display='flex'" title="Настройки"><i class="fas fa-cog"></i></a>
+    </div>
+</div>
+
+<div class="card" style="text-align:center; padding:24px;">
+    <div style="display:flex; flex-direction:column; align-items:center;">
+        <div class="avatar avatar-lg" style="width:100px; height:100px; font-size:40px; margin-bottom:12px;">
+            {% if user[3] and user[3] != 'default.jpg' %}
+            <img src="/static/avatars/{{ user[3] }}" style="width:100%; height:100%; object-fit:cover;">
+            {% else %}
+            {{ user[1][0].upper() }}
+            {% endif %}
+        </div>
+        <h2 style="font-size:22px;">{{ user[1] }}</h2>
+        <p style="color:var(--text-muted); margin:4px 0;">{{ user[4] or 'Пользователь Komits' }}</p>
+        {% if user[5] %}
+        <p style="color:var(--text-muted); font-size:13px;">Присоединился: {{ user[5][:10] }}</p>
         {% endif %}
     </div>
-    <h2>{{ user[1] }}</h2>
-    <p style="color:#999;margin:8px 0;">{{ user[4] or 'Пользователь Komits' }}</p>
-    <div style="display:flex;justify-content:center;gap:30px;margin-top:16px;">
-        <div><div style="font-size:20px;font-weight:bold;color:#667eea;">{{ posts_count }}</div><div style="color:#999;font-size:12px;">Постов</div></div>
-        <div><div style="font-size:20px;font-weight:bold;color:#667eea;">{{ friends_count }}</div><div style="color:#999;font-size:12px;">Друзей</div></div>
-        <div><div style="font-size:20px;font-weight:bold;color:#667eea;">{{ likes_count }}</div><div style="color:#999;font-size:12px;">Лайков</div></div>
+    
+    <div style="display:flex; justify-content:center; gap:24px; margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+        <div style="text-align:center;">
+            <div style="font-size:22px; font-weight:700; color:var(--accent);">{{ posts_count }}</div>
+            <div style="font-size:13px; color:var(--text-muted);">Постов</div>
+        </div>
+        <div style="text-align:center;">
+            <div style="font-size:22px; font-weight:700; color:var(--accent);">{{ friends_count }}</div>
+            <div style="font-size:13px; color:var(--text-muted);">Друзей</div>
+        </div>
+        <div style="text-align:center;">
+            <div style="font-size:22px; font-weight:700; color:var(--accent);">{{ likes_count }}</div>
+            <div style="font-size:13px; color:var(--text-muted);">Лайков</div>
+        </div>
     </div>
 </div>
+
 <div class="card">
-    <h3>Настройки</h3>
-    <form method="POST" action="/update_avatar" enctype="multipart/form-data" style="margin-bottom:12px;">
-        <input type="file" name="avatar" accept="image/*" style="margin-bottom:8px;">
-        <button type="submit" class="btn" style="width:100%;">Обновить аватар</button>
-    </form>
-    <form method="POST" action="/update_bio">
-        <input type="text" name="bio" placeholder="Статус" value="{{ user[4] or '' }}" style="margin-bottom:8px;">
-        <button type="submit" class="btn" style="width:100%;">Обновить статус</button>
-    </form>
+    <h3 style="font-size:16px; margin-bottom:12px;">Мои посты</h3>
+    {% set user_posts = posts_count %}
+    {% if user_posts > 0 %}
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;">
+        {% for i in range(user_posts) %}
+        <div style="aspect-ratio:1; background:var(--border); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">
+            📸
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-muted); text-align:center; padding:20px;">Нет постов</p>
+    {% endif %}
 </div>
+
+<!-- Modal настроек -->
+<div id="settingsModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:999; justify-content:center; align-items:center; padding:20px;">
+    <div style="background:var(--card); border-radius:var(--radius); padding:24px; max-width:400px; width:100%; border:1px solid var(--border);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="font-size:18px;"><i class="fas fa-cog"></i> Настройки</h3>
+            <button onclick="document.getElementById('settingsModal').style.display='none'" style="background:none; border:none; color:var(--text); font-size:24px; cursor:pointer;">×</button>
+        </div>
+        
+        <form method="POST" action="/update_avatar" enctype="multipart/form-data" style="margin-bottom:12px;">
+            <label style="display:block; margin-bottom:4px; font-weight:500;">Аватар</label>
+            <input type="file" name="avatar" accept="image/*" required style="margin-bottom:8px;">
+            <button type="submit" class="btn" style="width:100%; justify-content:center;">Обновить аватар</button>
+        </form>
+        
+        <form method="POST" action="/update_bio">
+            <label style="display:block; margin-bottom:4px; font-weight:500;">Статус</label>
+            <input type="text" name="bio" placeholder="Ваш статус..." value="{{ user[4] or '' }}" style="margin-bottom:8px;">
+            <button type="submit" class="btn" style="width:100%; justify-content:center;">Обновить статус</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('settingsModal').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+});
+</script>
 {% endblock %}

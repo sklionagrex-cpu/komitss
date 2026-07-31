@@ -1,25 +1,69 @@
 {% extends "base.html" %}
-{% block title %}Сообщество{% endblock %}
+{% block title %}{{ community[1] }}{% endblock %}
 {% block content %}
-<div class="header"><h2>🌍 {{ community[1] }}</h2><a href="/communities">← Назад</a></div>
-<div class="card">
-    <p style="color:#999;">{{ community[4] or 'Описание отсутствует' }}</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-        <span style="background:#1a1a2e;padding:4px 12px;border-radius:12px;">👥 {{ members_count }} участников</span>
-        {% if not is_member %}<a href="/join_community/{{ community[0] }}" class="btn" style="padding:6px 12px;font-size:12px;text-decoration:none;">Вступить</a>
-        {% else %}<a href="/leave_community/{{ community[0] }}" class="btn btn-danger" style="padding:6px 12px;font-size:12px;text-decoration:none;">Выйти</a>{% endif %}
+<div class="header">
+    <h2><i class="fas fa-hashtag"></i> {{ community[1] }}</h2>
+    <div class="header-actions">
+        <a href="/communities"><i class="fas fa-arrow-left"></i></a>
     </div>
 </div>
-<div class="card"><h3>Посты</h3>
-{% if posts %}{% for post in posts %}<div style="background:#1a1a2e;padding:12px;border-radius:12px;margin-bottom:8px;">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><strong>{{ post[5] }}</strong><span style="color:#999;font-size:11px;">{{ post[4] }}</span></div>
-    <p>{{ post[2] }}</p>{% if post[3] %}<img src="/uploads/{{ post[3] }}" style="max-width:100%;border-radius:8px;margin-top:8px;">{% endif %}
-</div>{% endfor %}{% else %}<p style="color:#999;">Нет постов</p>{% endif %}</div>
-<div class="card"><h3>Создать пост</h3>
-<form method="POST" action="/create_community_post/{{ community[0] }}" enctype="multipart/form-data">
-    <textarea name="text" placeholder="Текст поста..." rows="3" style="margin-bottom:8px;"></textarea>
-    <input type="file" name="image" accept="image/*" style="margin-bottom:8px;">
-    <button type="submit" class="btn" style="width:100%;">Опубликовать</button>
-</form>
+
+<div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <p style="color:var(--text-muted);">{{ community[4] or 'Описание отсутствует' }}</p>
+            <div style="font-size:14px; color:var(--text-muted); margin-top:4px;">
+                <i class="fas fa-users"></i> {{ members_count }} участников
+            </div>
+        </div>
+        <div>
+            {% if not is_member %}
+            <a href="/join_community/{{ community[0] }}" class="btn" style="padding:6px 14px; font-size:13px; text-decoration:none;">Вступить</a>
+            {% else %}
+            <a href="/leave_community/{{ community[0] }}" class="btn btn-danger" style="padding:6px 14px; font-size:13px; text-decoration:none;">Выйти</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3 style="font-size:15px; margin-bottom:10px;"><i class="fas fa-pen"></i> Создать пост</h3>
+    <form method="POST" action="/create_community_post/{{ community[0] }}" enctype="multipart/form-data">
+        <textarea name="text" placeholder="Что нового в сообществе?" rows="2" style="margin-bottom:8px;"></textarea>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <label style="cursor:pointer; color:var(--text-muted);">
+                <i class="fas fa-image" style="font-size:20px;"></i>
+                <input type="file" name="image" accept="image/*" style="display:none;">
+            </label>
+            <button type="submit" class="btn" style="flex:1; justify-content:center;">Опубликовать</button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3 style="font-size:15px; margin-bottom:10px;">Посты сообщества</h3>
+    {% if posts %}
+        {% for post in posts %}
+        <div style="background:#1a1a1e; border-radius:12px; padding:12px; margin-bottom:8px; border:1px solid var(--border);">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <div class="avatar avatar-sm">
+                    {% if post[6] and post[6] != 'default.jpg' %}
+                    <img src="/static/avatars/{{ post[6] }}" style="width:100%; height:100%; object-fit:cover;">
+                    {% else %}
+                    {{ post[5][0].upper() }}
+                    {% endif %}
+                </div>
+                <span style="font-weight:600;">{{ post[5] }}</span>
+                <span style="color:var(--text-muted); font-size:11px; margin-left:auto;">{{ post[4] }}</span>
+            </div>
+            <p>{{ post[2] }}</p>
+            {% if post[3] %}
+            <img src="/uploads/{{ post[3] }}" style="max-width:100%; border-radius:8px; margin-top:6px;">
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <p style="color:var(--text-muted); text-align:center; padding:20px;">Пока нет постов</p>
+    {% endif %}
 </div>
 {% endblock %}
