@@ -1,5 +1,25 @@
 {% extends "base.html" %}
+{% block title %}Сообщество{% endblock %}
 {% block content %}
-<div class="header"><h2>Сообщество</h2><a href="/">🏠</a></div>
-<div class="card"><p>Просмотр сообщества будет доступен позже</p></div>
+<div class="header"><h2>🌍 {{ community[1] }}</h2><a href="/communities">← Назад</a></div>
+<div class="card">
+    <p style="color:#999;">{{ community[4] or 'Описание отсутствует' }}</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+        <span style="background:#1a1a2e;padding:4px 12px;border-radius:12px;">👥 {{ members_count }} участников</span>
+        {% if not is_member %}<a href="/join_community/{{ community[0] }}" class="btn" style="padding:6px 12px;font-size:12px;text-decoration:none;">Вступить</a>
+        {% else %}<a href="/leave_community/{{ community[0] }}" class="btn btn-danger" style="padding:6px 12px;font-size:12px;text-decoration:none;">Выйти</a>{% endif %}
+    </div>
+</div>
+<div class="card"><h3>Посты</h3>
+{% if posts %}{% for post in posts %}<div style="background:#1a1a2e;padding:12px;border-radius:12px;margin-bottom:8px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><strong>{{ post[5] }}</strong><span style="color:#999;font-size:11px;">{{ post[4] }}</span></div>
+    <p>{{ post[2] }}</p>{% if post[3] %}<img src="/uploads/{{ post[3] }}" style="max-width:100%;border-radius:8px;margin-top:8px;">{% endif %}
+</div>{% endfor %}{% else %}<p style="color:#999;">Нет постов</p>{% endif %}</div>
+<div class="card"><h3>Создать пост</h3>
+<form method="POST" action="/create_community_post/{{ community[0] }}" enctype="multipart/form-data">
+    <textarea name="text" placeholder="Текст поста..." rows="3" style="margin-bottom:8px;"></textarea>
+    <input type="file" name="image" accept="image/*" style="margin-bottom:8px;">
+    <button type="submit" class="btn" style="width:100%;">Опубликовать</button>
+</form>
+</div>
 {% endblock %}

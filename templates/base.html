@@ -1,39 +1,38 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Komits</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial; background: #0a0a0a; color: white; padding: 16px; padding-bottom: 80px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .header { background: linear-gradient(135deg, #667eea, #764ba2); padding: 16px; border-radius: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-        .header a { color: white; text-decoration: none; margin-left: 15px; }
-        .card { background: #16213e; padding: 16px; border-radius: 16px; margin-bottom: 16px; border: 1px solid #2a2a4a; }
-        .btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 10px 20px; border-radius: 12px; cursor: pointer; display: inline-block; text-decoration: none; }
-        input, textarea { width: 100%; padding: 12px; background: #1a1a2e; border: 1px solid #2a2a4a; border-radius: 12px; color: white; }
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1a2e; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #2a2a4a; }
-        .nav a { color: #666; text-decoration: none; font-size: 24px; padding: 8px 16px; border-radius: 12px; }
-        .nav a.active { color: #667eea; background: rgba(102,126,234,0.15); }
-        .flash { background: #ff6b6b; padding: 12px; border-radius: 12px; margin-bottom: 16px; text-align: center; }
-    </style>
+<head><title>Komits - {% block title %}{% endblock %}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;background:#0a0a0a;color:#e0e0e0;padding:16px;padding-bottom:80px}
+.container{max-width:600px;margin:0 auto}
+.header{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:16px 20px;border-radius:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.header a{color:white;text-decoration:none;margin-left:15px}
+.card{background:#16213e;border-radius:16px;padding:16px;margin-bottom:16px;border:1px solid #2a2a4a}
+.btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;padding:10px 20px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.btn-danger{background:linear-gradient(135deg,#ff6b6b,#ee5a24)}
+input,textarea{width:100%;padding:12px;background:#1a1a2e;border:2px solid #2a2a4a;border-radius:12px;color:#e0e0e0;font-size:16px;font-family:inherit}
+input:focus,textarea:focus{border-color:#667eea;outline:none}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#1a1a2e;display:flex;justify-content:space-around;padding:12px;border-top:1px solid #2a2a4a}
+.nav a{text-decoration:none;color:#666;font-size:24px;padding:8px 16px;border-radius:12px}
+.nav a.active{color:#667eea;background:rgba(102,126,234,0.15)}
+.flash{background:#ff6b6b;color:white;padding:12px;border-radius:12px;margin-bottom:16px;text-align:center}
+img{max-width:100%;border-radius:8px}
+.avatar{width:40px;height:40px;border-radius:50%;object-fit:cover}
+</style>
 </head>
 <body>
-    <div class="container">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="flash">{{ messages[0] }}</div>
-            {% endif %}
-        {% endwith %}
-        {% block content %}{% endblock %}
-    </div>
-    <div class="nav">
-        <a href="/" class="active">🏠</a>
-        <a href="/chats">💬</a>
-        <a href="/friends">👥</a>
-        <a href="/communities">🌍</a>
-        <a href="/leaderboard">🏆</a>
-        <a href="/profile">👤</a>
-    </div>
+<div class="container">
+{% with messages = get_flashed_messages() %}{% if messages %}<div class="flash">{{ messages[0] }}</div>{% endif %}{% endwith %}
+{% block content %}{% endblock %}
+</div>
+<div class="nav">
+<a href="/" class="{% if request.path == '/' %}active{% endif %}">🏠</a>
+<a href="/chats" class="{% if request.path == '/chats' %}active{% endif %}">💬</a>
+<a href="/friends" class="{% if request.path == '/friends' %}active{% endif %}">👥</a>
+<a href="/communities" class="{% if request.path == '/communities' %}active{% endif %}">🌍</a>
+<a href="/leaderboard" class="{% if request.path == '/leaderboard' %}active{% endif %}">🏆</a>
+<a href="/profile" class="{% if request.path == '/profile' %}active{% endif %}">👤</a>
+</div>
 </body>
 </html>

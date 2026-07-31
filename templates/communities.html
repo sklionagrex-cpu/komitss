@@ -1,5 +1,22 @@
 {% extends "base.html" %}
+{% block title %}Сообщества{% endblock %}
 {% block content %}
 <div class="header"><h2>Сообщества</h2><a href="/">🏠</a></div>
-<div class="card"><p>Сообщества будут доступны позже</p></div>
+<div class="card"><h3>Создать сообщество</h3>
+<form method="POST" action="/create_community">
+    <input type="text" name="name" placeholder="Название" required style="margin-bottom:8px;">
+    <input type="text" name="description" placeholder="Описание" style="margin-bottom:8px;">
+    <button type="submit" class="btn" style="width:100%;">Создать</button>
+</form></div>
+{% if communities %}{% for community in communities %}
+<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:start;">
+        <div><h3 style="color:#667eea;">{{ community[1] }}</h3><p style="color:#999;font-size:14px;">{{ community[4] or '' }}</p>
+        <div style="color:#999;font-size:13px;">👥 {{ community[8] }} участников</div></div>
+        <div>{% if community[9] > 0 %}<a href="/community/{{ community[0] }}" class="btn" style="padding:6px 12px;font-size:12px;text-decoration:none;">Открыть</a>
+        <a href="/leave_community/{{ community[0] }}" class="btn btn-danger" style="padding:6px 12px;font-size:12px;text-decoration:none;margin-top:4px;display:inline-block;">Выйти</a>
+        {% else %}<a href="/join_community/{{ community[0] }}" class="btn" style="padding:6px 12px;font-size:12px;text-decoration:none;">Вступить</a>{% endif %}</div>
+    </div>
+</div>{% endfor %}{% else %}
+<div class="card" style="text-align:center;padding:40px;"><p>Нет сообществ</p></div>{% endif %}
 {% endblock %}

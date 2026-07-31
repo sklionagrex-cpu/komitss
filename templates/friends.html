@@ -1,5 +1,69 @@
 {% extends "base.html" %}
+{% block title %}Друзья{% endblock %}
 {% block content %}
 <div class="header"><h2>Друзья</h2><a href="/">🏠</a></div>
-<div class="card"><p>Друзья будут доступны позже</p></div>
+<div class="card">
+    <h3>Найти</h3>
+    <div style="display:flex;gap:10px;">
+        <input type="text" id="searchInput" placeholder="Введите имя..." style="flex:1;" onkeyup="searchUsers(this.value)">
+        <button class="btn" onclick="searchUsers(document.getElementById('searchInput').value)">🔍</button>
+    </div>
+    <div id="searchResults" style="margin-top:12px;"></div>
+</div>
+{% if friends %}
+<div class="card"><h3>Мои друзья ({{ friends|length }})</h3>
+{% for friend in friends %}<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#1a1a2e;border-radius:12px;margin-bottom:8px;border:1px solid #2a2a4a;">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;overflow:hidden;">
+            {% if friend[2] and friend[2] != 'default.jpg' %}<img src="/static/avatars/{{ friend[2] }}" style="width:100%;height:100%;object-fit:cover;">{% else %}{{ friend[1][0].upper() }}{% endif %}
+        </div>
+        <div><strong>{{ friend[1] }}</strong><div style="color:#999;font-size:12px;">{{ friend[3] or 'Пользователь' }}</div></div>
+    </div>
+    <a href="/profile/{{ friend[1] }}" class="btn" style="padding:6px 12px;font-size:12px;text-decoration:none;">Профиль</a>
+</div>{% endfor %}</div>
+{% endif %}
+{% if requests %}
+<div class="card"><h3>Запросы</h3>
+{% for req in requests %}<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#1a1a2e;border-radius:12px;margin-bottom:8px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;overflow:hidden;">
+            {% if req[2] and req[2] != 'default.jpg' %}<img src="/static/avatars/{{ req[2] }}" style="width:100%;height:100%;object-fit:cover;">{% else %}{{ req[1][0].upper() }}{% endif %}
+        </div>
+        <strong>{{ req[1] }}</strong>
+    </div>
+    <form method="POST" action="/add_friend">
+        <input type="hidden" name="friend_id" value="{{ req[0] }}">
+        <input type="hidden" name="action" value="accept">
+        <button type="submit" class="btn" style="padding:6px 12px;font-size:12px;">Принять</button>
+    </form>
+</div>{% endfor %}</div>
+{% endif %}
+<script>
+function searchUsers(query) {
+    const results = document.getElementById('searchResults');
+    if (query.length < 2) { results.innerHTML = ''; return; }
+    fetch(`/search_users?q=${encodeURIComponent(query)}`)
+        .then(r => r.json())
+        .then(users => {
+            if (users.length === 0) { results.innerHTML = '<p style="color:#999;padding:10px;">Не найдены</p>'; return; }
+            let html = '';
+            users.forEach(u => {
+                html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#16213e;border-radius:10px;margin-bottom:6px;border:1px solid #2a2a4a;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;overflow:hidden;">
+                            ${u.avatar && u.avatar !== 'default.jpg' ? `<img src="/static/avatars/${u.avatar}" style="width:100%;height:100%;object-fit:cover;">` : u.username[0].toUpperCase()}
+                        </div>
+                        <strong>${u.username}</strong>
+                    </div>
+                    <form method="POST" action="/add_friend">
+                        <input type="hidden" name="friend_id" value="${u.id}">
+                        <input type="hidden" name="action" value="add">
+                        <button type="submit" class="btn" style="padding:6px 12px;font-size:12px;">➕</button>
+                    </form>
+                </div>`;
+            });
+            results.innerHTML = html;
+        });
+}
+</script>
 {% endblock %}

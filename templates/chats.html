@@ -1,5 +1,19 @@
 {% extends "base.html" %}
+{% block title %}Чаты{% endblock %}
 {% block content %}
 <div class="header"><h2>Чаты</h2><a href="/">🏠</a></div>
-<div class="card"><p>Чаты будут доступны позже</p></div>
+<div class="card"><h3>Создать группу</h3>
+<form method="POST" action="/create_group">
+    <input type="text" name="name" placeholder="Название группы" required style="margin-bottom:8px;">
+    <button type="submit" class="btn" style="width:100%;">Создать</button>
+</form></div>
+{% if chats %}{% for chat in chats %}<a href="/chat/{{ chat[0] }}" style="text-decoration:none;display:block;">
+<div class="card" style="cursor:pointer;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div><strong>{% if chat[2] == 1 %}{{ chat[1] or 'Группа' }}{% else %}Чат{% endif %}</strong>
+        <div style="color:#999;font-size:12px;">{{ chat[8] }} участников{% if chat[7] > 0 %} <span style="background:#ff6b6b;color:white;padding:2px 8px;border-radius:10px;">{{ chat[7] }}</span>{% endif %}</div></div>
+        <span style="color:#999;">➡</span>
+    </div>
+</div></a>{% endfor %}{% else %}
+<div class="card" style="text-align:center;padding:40px;"><p>Нет чатов</p></div>{% endif %}
 {% endblock %}

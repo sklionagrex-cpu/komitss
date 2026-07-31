@@ -1,14 +1,44 @@
 {% extends "base.html" %}
+{% block title %}Лента{% endblock %}
 {% block content %}
-<div class="header">
-    <h2>Komits</h2>
-    <div>
-        <span>{{ username }}</span>
-        <a href="/logout">🚪</a>
-    </div>
-</div>
+<div class="header"><h2>Лента</h2><div><span>{{ username }}</span><a href="/logout">🚪</a></div></div>
 <div class="card">
-    <h3>Добро пожаловать, {{ username }}!</h3>
-    <p style="color: #999; margin-top: 8px;">Приложение работает. Функционал подключается...</p>
+    <h3>Новый пост</h3>
+    <form method="POST" action="/create_post" enctype="multipart/form-data">
+        <textarea name="text" placeholder="Что нового?" rows="3" style="margin-bottom:10px;"></textarea>
+        <input type="file" name="image" accept="image/*" style="margin-bottom:10px;">
+        <button type="submit" class="btn">Опубликовать</button>
+    </form>
 </div>
+{% if posts %}
+    {% for post in posts %}
+    <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <a href="/profile/{{ post[7] }}"><strong>{{ post[7] }}</strong></a>
+            <span style="color:#999;font-size:12px;">{{ post[4] }}</span>
+        </div>
+        <p>{{ post[2] }}</p>
+        {% if post[3] %}<img src="/uploads/{{ post[3] }}" style="max-width:100%;border-radius:8px;margin:10px 0;">{% endif %}
+        <div style="border-top:1px solid #2a2a4a;padding-top:10px;margin-top:10px;">
+            <form method="POST" action="/add_comment/{{ post[0] }}" enctype="multipart/form-data" style="display:flex;gap:8px;flex-wrap:wrap;">
+                <input type="text" name="text" placeholder="Комментарий..." style="flex:1;">
+                <input type="file" name="image" accept="image/*" style="flex:1;">
+                <button type="submit" class="btn" style="padding:8px 16px;">💬</button>
+            </form>
+            {% if comments_dict and post[0] in comments_dict %}
+                {% for comment in comments_dict[post[0]] %}
+                <div style="background:#1a1a2e;padding:8px 12px;border-radius:8px;margin:4px 0;display:flex;justify-content:space-between;align-items:center;">
+                    <div><strong>{{ comment[5] }}</strong>: {{ comment[3] }}{% if comment[4] %}<br><img src="/uploads/{{ comment[4] }}" style="max-width:80px;border-radius:8px;margin-top:4px;">{% endif %}</div>
+                    <a href="/like_comment/{{ comment[0] }}" style="color:#ff6b6b;text-decoration:none;">❤️ {{ comment[6] }}</a>
+                </div>
+                {% endfor %}
+            {% else %}
+            <p style="color:#999;font-size:14px;margin-top:8px;">Нет комментариев</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="card" style="text-align:center;padding:40px;"><p>Нет постов</p></div>
+{% endif %}
 {% endblock %}
